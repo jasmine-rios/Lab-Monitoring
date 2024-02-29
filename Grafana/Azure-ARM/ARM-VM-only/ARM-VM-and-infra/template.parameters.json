@@ -3,7 +3,7 @@
 	"contentVersion": "1.0.0.0",
 	"parameters": {
 		"location": {
-			"value": "",
+			"value":"eastus",
 			"metadata": {
 				"description": "The region that the virtual machine will reside in."
 			}
@@ -37,7 +37,7 @@
 					}
 				},
 				{
-					"name": "HTTP",
+					"name": "Grafana",
 					"properties": {
 						"priority": 400,
 						"protocol": "TCP",
@@ -46,8 +46,8 @@
 						"sourceAddressPrefix": "*",
 						"sourcePortRange": "*",
 						"destinationAddressPrefix": "*",
-						"destinationPortRange": "80",
-						"description": "Allow inbound HTTP traffic from anywhere."
+						"destinationPortRange": "3000",
+						"description": "Allow inbound default Grafana port"
 					}
 				}
 			]
