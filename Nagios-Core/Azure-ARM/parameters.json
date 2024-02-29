@@ -1,0 +1,128 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "usgovvirginia",
+            "metadata": {
+                "description": "The region that the virtual machine will reside in."
+            }
+        },
+        "networkInterfaceName": {
+            "value": "Nagios-NI",
+            "metadata": {
+                "description": "The name of the network interface to created for use by the virtual machine."
+            }
+        },
+        "networkSecurityGroupName": {
+            "value": "Nagios-NSG",
+            "metadata": {
+                "description": "The name of the network security group that will created to allow ports 80 and 22."
+            }
+        },
+        "networkSecurityGroupRules": {
+            "value": [
+                {
+                    "name": "SSH",
+                    "properties": {
+                        "priority": 300,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "22",
+                        "description": "Allow inbound SSH traffic from anywhere."
+                    }
+                },
+                {
+                    "name": "HTTP",
+                    "properties": {
+                        "priority": 400,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "80",
+                        "description": "Allow inbound HTTP traffic from anywhere."
+                    }
+                }
+            ]
+        },
+        "publicIpAddressName": {
+            "value": "Nagios-PublicIP",
+            "metadata": {
+                "description": "The name of the public IP (PIP) to be created for use by the virtual machine."
+            }
+        },
+        "publicIpAddressType": {
+            "value": "Static",
+            "metadata": {
+                "description": "The type of PIP to be set; PIP will stay the same after reboot of the virtual machine."
+            }
+        },
+        "publicIpAddressSku": {
+            "value": "Standard",
+            "metadata": {
+                "description": "The SKU of the PIP to be used."
+            }
+        },
+        "virtualMachineName": {
+            "value": "Nagios-RHEL",
+            "metadata": {
+                "description": "The name of the virtual machine to be created."
+            }
+        },
+        "osDiskType": {
+            "value": "Premium_LRS",
+            "metadata": {
+                "description": "The type of disk to be used by RHEL OS which is locally redudant."
+            }
+        },
+        "virtualMachineSize": {
+            "value": "Standard_B2s",
+            "metadata": {
+                "description": "The size that the virtual machine will be created in."
+            }
+        },
+        "adminUsername": {
+            "value": "azureuser",
+            "metadata": {
+                "description": "The admin username to be used to log into the RHEL VM using SSH."
+            }
+        },
+        "securityType": {
+            "value": "TrustedLaunch",
+            "metadata": {
+                "description": "The recommended security type for the VM to be created in."
+            }
+        },
+        "secureBoot": {
+            "value": true,
+            "metadata": {
+                "description": "The recommened boot settings for the VM to be created in."
+            }
+        },
+        "vTPM": {
+            "value": true,
+            "metadata": {
+                "description": "The virtual trusted platform module that the VM will have as best security practices."
+            }
+        },
+        "sshPublicKey": {
+            "value": "string",
+            "metadata": {
+                "description": "Provide your SSH-rsa public key for authentication. Keep associated private key with you."
+            }
+        },
+        "virtualNetworkName": {
+            "value": "Nagios-VNet",
+            "metadata": {
+                "description": "Vnet that the VM will reside on."
+            }
+        }
+    }
+}

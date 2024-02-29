@@ -1,0 +1,240 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string"
+        },
+        "networkInterfaceName": {
+            "type": "string"
+        },
+        "networkSecurityGroupName": {
+            "type": "string"
+        },
+        "networkSecurityGroupRules": {
+            "type": "array"
+        },
+        "publicIpAddressName": {
+            "type": "string"
+        },
+        "publicIpAddressType": {
+            "type": "string"
+        },
+        "publicIpAddressSku": {
+            "type": "string"
+        },
+        "virtualMachineName": {
+            "type": "string"
+        },
+        "osDiskType": {
+            "type": "string"
+        },
+        "virtualMachineSize": {
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "string"
+        },
+        "securityType": {
+            "type": "string"
+        },
+        "secureBoot": {
+            "type": "bool"
+        },
+        "vTPM": {
+            "type": "bool"
+        },
+        "sshPublicKey": {
+            "type": "string"
+        },
+        "virtualNetworkName": {
+            "type": "string"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('virtualNetworkName')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2022-11-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "Nagios-Subnet",
+                        "properties": {
+                            "addressPrefix": "10.0.1.0/24"
+                        }
+                    }
+                ]
+            },
+            "tags": {
+                "Template by": "Jasmine Rios",
+                "Project": "Nagios"
+            }
+        },
+        {
+            "name": "[parameters('networkInterfaceName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2022-11-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/Nagios-Subnet')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+                }
+            },
+            "tags": {
+                "Template by": "Jasmine Rios",
+                "Project": "Nagios"
+            }
+        },
+        {
+            "name": "[parameters('networkSecurityGroupName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-02-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": "[parameters('networkSecurityGroupRules')]"
+            },
+            "tags": {
+                "Template by": "Jasmine Rios",
+                "Project": "Nagios"
+            }
+        },
+        {
+            "name": "[parameters('publicIpAddressName')]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2019-02-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
+            },
+            "sku": {
+                "name": "[parameters('publicIpAddressSku')]"
+            },
+            "tags": {
+                "Template by": "Jasmine Rios",
+                "Project": "Nagios"
+            }
+        },
+        {
+            "name": "[parameters('virtualMachineName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-03-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[parameters('osDiskType')]"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "redhat",
+                        "offer": "rhel-raw",
+                        "sku": "92_gen2",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachineName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "customData": "[base64('#cloud-config\npackage_upgrade: true\npackages:\n  - gcc\n  - glibc\n  - glibc-common\n  - make\n  - gettext\n  - automake\n  - autoconf\n  - wget\n  - unzip\n  - openssl-devel\n  - sudo\n  - httpd\n  - nagios\n  - nagios-plugins\n\nruncmd:\n  - sudo setenforce 0\n  - sudo yum update -y\n  - cd ~\n  - wget -O nagioscore.tar.gz https://github.com/NagiosEnterprises/nagioscore/archive/nagios-4.5.0.tar.gz\n  - tar xzf nagioscore.tar.gz\n  - cd nagioscore-nagios-4.5.0\n  - ./configure --with-httpd-conf=/etc/apache2/sites-enabled\n  - make all\n  - sudo make install-groups-users\n  - sudo usermod -a -G nagios apache\n  - sudo make install\n  - sudo make install-daemoninit\n  - sudo systemctl enable httpd.service\n  - sudo systemctl start httpd.service\n  - sudo firewall-cmd --zone=public --add-port=80/tcp\n  - sudo firewall-cmd --zone=public --add-port=80/tcp --permanent\n  - sudo dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm\n  - sudo rpm -ihv epel-release-latest-9.noarch.rpm\n  - sudo subscription-manager repos --enable codeready-builder-for-rhel-9-$(arch)-rpms\n  - cd ~\n  - wget --no-check-certificate -O nagios-plugins.tar.gz https://github.com/nagios-plugins/nagios-plugins/archive/release-2.4.8.tar.gz\n  - tar xzf nagios-plugins.tar.gz\n  - cd nagios-plugins-release-2.4.8\n  - ./tools/setup\n  - ./configure\n  - sudo make\n  - sudo make install')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": true,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                                    "keyData": "[parameters('sshPublicKey')]"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "securityProfile": {
+                    "securityType": "[parameters('securityType')]",
+                    "uefiSettings": {
+                        "secureBootEnabled": "[parameters('secureBoot')]",
+                        "vTpmEnabled": "[parameters('vTPM')]"
+                    }
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            },
+            "tags": {
+                "Template by": "Jasmine Rios",
+                "Project": "Nagios"
+            }
+        },
+        {
+            "name": "[format('{0}/{1}', variables('vmName'), 'Install-Nagios.ps1')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2021-04-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines',[parameters('virtualMachineName')])]"
+            ],
+            "properties": {
+              "publisher": "Microsoft.Compute",
+              "type": "CustomScriptExtension",
+              "typeHandlerVersion": "1.7",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "commandToExecute": "bash sudo htpasswd -b -c /usr/local/nagios/etc/htpasswd.users nagiosadmin && bash sudo systemctl restart httpd.service && bash sudo systemctl enable nagios.service && bash sudo systemctl start nagios.service && echo 'Nagios is now setup! Navigate to the browser with the URL https:<RHEL-PublicIpAddress>/nagios and login with nagiosadmin and the password you just set.'"
+              }
+            },
+            "tags": {
+                "Template by": "Jasmine Rios",
+                "Project": "Nagios"
+            }
+          }
+    ],
+    "outputs": {
+        "SSH Instructions": {
+            "type": "string",
+            "value": "[concat('SSH into the instance using the following command: \nssh -i <path-to-private-key>/<name-of-private-key> ', parameters('adminUsername'), '@', reference(resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))).ipAddress)]"
+        }
+    }
+}

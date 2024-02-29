@@ -1,0 +1,219 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string"
+        },
+        "networkInterfaceName": {
+            "type": "string"
+        },
+        "networkSecurityGroupName": {
+            "type": "string"
+        },
+        "networkSecurityGroupRules": {
+            "type": "array"
+        },
+        "publicIpAddressName": {
+            "type": "string"
+        },
+        "publicIpAddressType": {
+            "type": "string"
+        },
+        "publicIpAddressSku": {
+            "type": "string"
+        },
+        "virtualMachineName": {
+            "type": "string"
+        },
+        "osDiskType": {
+            "type": "string"
+        },
+        "virtualMachineSize": {
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "string"
+        },
+        "securityType": {
+            "type": "string"
+        },
+        "secureBoot": {
+            "type": "bool"
+        },
+        "vTPM": {
+            "type": "bool"
+        },
+        "sshPublicKey": {
+            "type": "string"
+        },
+        "virtualNetworkName": {
+            "type": "string"
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+    {
+        "name": "[parameters('virtualNetworkName')]",
+        "type": "Microsoft.Network/virtualNetworks",
+        "apiVersion": "2022-11-01",
+        "location": "[parameters('location')]",
+        "properties": {
+            "addressSpace": {
+                "addressPrefixes": [
+                    "10.0.0.0/16"
+                ]
+            },
+            "subnets": [
+                {
+                    "name": "Grafana-Subnet",
+                    "properties": {
+                        "addressPrefix": "10.0.1.0/24"
+                    }
+                }
+            ]
+        },
+        "tags": {
+            "Template by": "Jasmine Rios",
+            "Project": "Grafana"
+        }
+    },
+    {
+        "name": "[parameters('networkInterfaceName')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "2022-11-01",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
+            "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]",
+            "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
+        ],
+        "properties": {
+            "ipConfigurations": [
+                {
+                    "name": "ipconfig1",
+                    "properties": {
+                        "subnet": {
+                            "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/Grafana-Subnet')]"
+                        },
+                        "privateIPAllocationMethod": "Dynamic",
+                        "publicIpAddress": {
+                            "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
+                        }
+                    }
+                }
+            ],
+            "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+            }
+        },
+        "tags": {
+            "Template by": "Jasmine Rios",
+            "Project": "Grafana"
+        }
+    },
+    {
+        "name": "[parameters('networkSecurityGroupName')]",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "apiVersion": "2019-02-01",
+        "location": "[parameters('location')]",
+        "properties": {
+            "securityRules": "[parameters('networkSecurityGroupRules')]"
+        },
+        "tags": {
+            "Template by": "Jasmine Rios",
+            "Project": "Grafana"
+        }
+    },
+    {
+        "name": "[parameters('publicIpAddressName')]",
+        "type": "Microsoft.Network/publicIpAddresses",
+        "apiVersion": "2019-02-01",
+        "location": "[parameters('location')]",
+        "properties": {
+            "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
+        },
+        "sku": {
+            "name": "[parameters('publicIpAddressSku')]"
+        },
+        "tags": {
+            "Template by": "Jasmine Rios",
+            "Project": "Grafana"
+        }
+    },
+    {
+        "name": "[parameters('virtualMachineName')]",
+        "type": "Microsoft.Compute/virtualMachines",
+        "apiVersion": "2021-03-01",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+            "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
+        ],
+        "properties": {
+            "hardwareProfile": {
+                "vmSize": "[parameters('virtualMachineSize')]"
+            },
+            "storageProfile": {
+                "osDisk": {
+                    "createOption": "fromImage",
+                    "managedDisk": {
+                        "storageAccountType": "[parameters('osDiskType')]"
+                    }
+                },
+                "imageReference": {
+                    "publisher": "redhat",
+                    "offer": "rhel-raw",
+                    "sku": "92_gen2",
+                    "version": "latest"
+                }
+            },
+            "networkProfile": {
+                "networkInterfaces": [
+                    {
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
+                    }
+                ]
+            },
+            "osProfile": {
+                "computerName": "[parameters('virtualMachineName')]",
+                "adminUsername": "[parameters('adminUsername')]",
+                "customData": "",
+                "linuxConfiguration": {
+                    "disablePasswordAuthentication": true,
+                    "ssh": {
+                        "publicKeys": [
+                            {
+                                "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                                "keyData": "[parameters('sshPublicKey')]"
+                            }
+                        ]
+                    }
+                }
+            },
+            "securityProfile": {
+                "securityType": "[parameters('securityType')]",
+                "uefiSettings": {
+                    "secureBootEnabled": "[parameters('secureBoot')]",
+                    "vTpmEnabled": "[parameters('vTPM')]"
+                }
+            },
+            "diagnosticsProfile": {
+                "bootDiagnostics": {
+                    "enabled": true
+                }
+            }
+        },
+        "tags": {
+            "Template by": "Jasmine Rios",
+            "Project": "Grafana"
+        }
+    }
+    ],
+    "outputs": {
+        "SSH Instructions": {
+            "type": "string",
+            "value": "[concat('SSH into the instance using the following command: \nssh -i <path-to-private-key>/<name-of-private-key> ', parameters('adminUsername'), '@', reference(resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))).ipAddress)]"
+        }
+    }
+}

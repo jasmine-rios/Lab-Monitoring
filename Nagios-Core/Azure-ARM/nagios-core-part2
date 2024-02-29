@@ -1,0 +1,17 @@
+# This is the bash script to run after SSH into RHEL virtual machine.
+# It contains the command to set the password for user 'nagiosadmin' and can not be automated into the ARM template
+
+# This is already added to template.json under Resources> VM extensions> CustomScriptExtension> commandsToExecute
+# The commands are there without the comments
+# Creates 'nagiosadmin' and you have to specify a password for login once you go into Nagios UI
+sudo htpasswd -b -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
+
+# Restarts apache
+sudo systemctl restart httpd.service
+
+# Enable and start Nagios service
+sudo systemctl enable nagios.service
+sudo systemctl start nagios.service
+
+# Prints out how to get into Nagios Core via browser
+echo "Nagios is now setup! Navigate to the browser with 'https:<RHEL-PublicIpAddress>/nagios' and login with 'nagiosadmin' and the password you just set"

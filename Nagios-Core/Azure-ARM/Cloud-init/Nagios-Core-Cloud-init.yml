@@ -1,0 +1,46 @@
+#cloud-config
+package_upgrade: true
+packages:
+  - gcc
+  - glibc
+  - glibc-common
+  - make
+  - gettext
+  - automake
+  - autoconf
+  - wget
+  - unzip
+  - openssl-devel
+  - sudo
+  - httpd
+  - nagios
+  - nagios-plugins
+
+runcmd:
+  - sudo setenforce 0
+  - sudo yum update -y
+  - cd ~
+  - wget -O nagioscore.tar.gz https://github.com/NagiosEnterprises/nagioscore/archive/nagios-4.5.0.tar.gz
+  - tar xzf nagioscore.tar.gz
+  - cd nagioscore-nagios-4.5.0
+  - ./configure --with-httpd-conf=/etc/apache2/sites-enabled
+  - make all
+  - sudo make install-groups-users
+  - sudo usermod -a -G nagios apache
+  - sudo make install
+  - sudo make install-daemoninit
+  - sudo systemctl enable httpd.service
+  - sudo systemctl start httpd.service
+  - sudo firewall-cmd --zone=public --add-port=80/tcp
+  - sudo firewall-cmd --zone=public --add-port=80/tcp --permanent
+  - sudo dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+  - sudo rpm -ihv epel-release-latest-9.noarch.rpm
+  - sudo subscription-manager repos --enable codeready-builder-for-rhel-9-$(arch)-rpms
+  - cd ~
+  - wget --no-check-certificate -O nagios-plugins.tar.gz https://github.com/nagios-plugins/nagios-plugins/archive/release-2.4.8.tar.gz
+  - tar xzf nagios-plugins.tar.gz
+  - cd nagios-plugins-release-2.4.8
+  - ./tools/setup
+  - ./configure
+  - sudo make
+  - sudo make install

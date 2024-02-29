@@ -1,0 +1,141 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Install Grafana
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    Description: EC2 instance type for Grafana server
+  UseExistingKeyPair:
+    Description: Specify 'true' to use an existing key pair or 'false' to create a new one.
+    Type: String
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'false'
+  ExistingKeyPairName:
+    Description: Specify the name of an existing key pair.
+    Type: String
+    Condition: UseExistingKeyPair
+  AMI-Id:
+    Description: Specify the AMI ID for RHEL or whatever OS you are deploying Grafana on.
+    Type: String
+    Default: ami-0fe630eb857a6ec83
+  AvailabilityZone:
+    Type: String
+    Description: AvaliabilityZone in the region you want Grafana VM launched on. i.e. region of us-east-1 has availiabilty zones us-east-1a, us-east-1b, and so on
+    Default: us-east-1a
+  NetworkInterfaces:
+    Type: String
+    Description: Network Interface for Grafana EC2 instance
+  VPC-Id:
+    Type: String
+    Description: 'VPC ID where the EC2 instance will be launched. '
+  Subnet-Id:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet ID within the specified VPC
+  UseExistingSecurityGroup:
+    Description: Specify 'true' to use an existing security group or 'false' to create a new one.
+    Type: String
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'false'
+  ExistingSecurityGroupName:
+    Description: Specify the name of an existing security group.
+    Type: String
+    Condition: UseExistingSecurityGroup
+  NewSecurityGroupName:
+    Description: Specify the name for a new security group.
+    Type: String
+    Condition: NotExistingSecurityGroup
+    Default: Grafana-NSG
+  NewSecurityGroupDescription:
+    Description: Specify the description for the new security group.
+    Type: String
+    Condition: NotExistingSecurityGroup
+    Default: Network Security Group for Grafana
+Resources:
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      KeyName: !If
+        - UseExistingKeyPair
+        - !Ref ExistingKeyPairName
+        - !Ref AWS::NoValue
+      ImageId: !Ref AMI-Id
+      VpcId: !Ref VPC-Id
+      AvailabilityZone: !Ref AvailabilityZone
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: 'true'
+          DeviceIndex: '0'
+          DeleteOnTermination: 'true'
+          SubnetId: !Ref SubnetId
+      SecurityGroups: !If
+        - UseExistingSecurityGroup
+        - - !Ref ExistingSecurityGroupName
+        - - !Ref NewSecurityGroupName
+          - !If
+            - NotExistingSecurityGroup
+            - !Ref NewSecurityGroupDescription
+            - !Ref AWS::NoValue
+      Tags:
+        - Key: Name
+          Value: Grafana
+      UserData: Base64
+        Fn::Sub: |
+          #!/bin/bash
+          # Install Grafana using Yum
+          sudo yum install -y https://dl.grafana.com/enterprise/release/grafana-enterprise-10.3.3-1.x86_64.rpm # Latest package
+          # Enable Grafana to be able to start
+          sudo systemctl enable grafana-server
+          # Reload the daemon
+          sudo systemctl daemon-reload
+          # Start Grafana
+          sudo systemctl start grafana-server
+          # See if Grafana is running
+          sudo systemctl status grafana-server
+          # Check if Grafana is running
+          if sudo systemctl is-active --quiet grafana-server; then
+              echo "Grafana is set up and ready to use."
+              echo "To access the Grafana UI, use the following URL in a supported browser:"
+              echo "http://${MyEC2Instance.PublicIp}:3000"
+          else
+              echo "Grafana setup encountered an issue. Check Grafana service status using: sudo systemctl status grafana-server"
+          fi
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Condition: NotExistingSecurityGroup
+    Properties:
+      GroupName: !Ref NewSecurityGroupName
+      Description: !Ref NewSecurityGroupDescription
+      VpcId: !Ref VPC-Id
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: Grafana
+Conditions:
+  UseExistingKeyPairCondition: !Equals
+    - !Ref UseExistingKeyPair
+    - 'true'
+  UseExistingSecurityGroupCondition: !Equals
+    - !Ref UseExistingSecurityGroup
+    - 'true'
+  NotExistingSecurityGroup: !Not UseExistingSecurityGroupCondition
+Outputs:
+  GrafanaInstanceInfo:
+    Description: Information about the Grafana instance
+    Value: !Sub |
+      "To SSH into the EC2 instance running Grafana, use:
+      \nssh -i ${PrivateKeyPath}/${PrivateKeyName} grafana@${MyEC2Instance.PublicIp}.
+      \nRemember before SSHing into the EC2 instance to change permissions on the private key with:
+      \nchmod 400 ${PrivateKeyPath}/${PrivateKeyName}.
+      \nTo access the Grafana UI, use the following URL in supported browser: http://${MyEC2Instance.PublicIp}:3000"

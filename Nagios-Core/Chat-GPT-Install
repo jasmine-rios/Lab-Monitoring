@@ -1,0 +1,33 @@
+sudo yum update
+
+sudo yum install -y httpd php gcc glibc glibc-common gd gd-devel make net-snmp htpasswd
+
+cd ~
+wget https://github.com/NagiosEnterprises/nagioscore/releases/download/nagios-4.5.0/nagios-4.5.0.tar.gz
+
+tar -xvzf nagios-4.5.0.tar.gz
+cd nagios-4.5.0
+sudo ./configure --with-httpd-conf=/etc/httpd/conf.d
+sudo make all
+
+sudo make install-groups-users
+
+sudo make install
+
+sudo make install-commandmode
+sudo make install-webconf
+
+#sudo ln -s /etc/httpd/conf.d/nagios.conf /etc/httpd/conf.d/nagios.conf
+
+#Change user and group to nagios
+sudo nano /etc/httpd/conf.d/nagios.conf
+
+sudo htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
+
+sudo systemctl start httpd
+sudo systemctl start nagios
+
+sudo systemctl enable httpd
+sudo systemctl enable nagios
+
+
