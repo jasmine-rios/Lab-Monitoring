@@ -3,7 +3,11 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "type": "string"
+            "type": "string",
+            "allowedValues": [
+                "AzureGov.USVirginia",
+                "eastus"
+            ]
         },
         "networkInterfaceName": {
             "type": "string"
@@ -178,7 +182,7 @@
             "osProfile": {
                 "computerName": "[parameters('virtualMachineName')]",
                 "adminUsername": "[parameters('adminUsername')]",
-                "customData": "",
+                "customData": "[base64('#!/bin/bash This installs Grafana from the RPM but allows you to control the version of Grafana.\n# Manually updating Grafana is required by the script.\n\n# Install Grafana using Yum\n\nsudo yum install -y https://dl.grafana.com/enterprise/release/grafana-enterprise-10.3.3-1.x86_64.rpm # Latest package\n\n# Enable Grafana to be able to start\n\nsudo systemctl enable grafana-server\n\n# Reload the daemon\n\nsudo systemctl daemon-reload\n\n# Enable VM firewall to allow port 3000\n\nsudo firewall-cmd --zone=public --add-port=3000/tcp --permanent\n\n# Start Grafana\n\nsudo systemctl start grafana-server\n\n# See if Grafana is running\n\nsudo systemctl status grafana-server\n\n# Check if Grafana is running\nif sudo systemctl is-active --quiet grafana-server; then\necho \"Grafana is set up and ready to use.\"\necho \"To access the Grafana UI, use the following URL in a supported browser:\"\necho \"http://<PublicIp>:3000\"\nelse\necho \"Grafana setup encountered an issue. Check Grafana service status using: sudo systemctl status grafana-server\"\nfi')]",
                 "linuxConfiguration": {
                     "disablePasswordAuthentication": true,
                     "ssh": {
@@ -191,6 +195,16 @@
                     }
                 }
             },
+"extensions": [
+    {
+        "name": "customScript",
+        "properties": {
+            "script": "[base64('#!/bin/bash && if systemctl is-active --quiet grafana-server; then echo \"Grafana is already installed and running.\" && echo \"To access the Grafana UI, use the following URL in a supported browser:\" && echo \"http://[parameters('publicIpAddress')]:3000\" && echo \"Use admin as the username and password then reset the password\"; else sudo yum install -y https://dl.grafana.com/enterprise/release/grafana-enterprise-10.3.3-1.x86_64.rpm && sudo systemctl enable grafana-server && sudo systemctl daemon-reload && sudo firewall-cmd --zone=public --add-port=3000/tcp --permanent && sudo systemctl start grafana-server && sudo systemctl status grafana-server && if systemctl is-active --quiet grafana-server; then echo \"Grafana is set up and ready to use.\" && echo \"To access the Grafana UI, use the following URL in a supported browser:\" && echo \"http://[parameters('publicIpAddress')]:3000\" && echo \"Use admin as the username and password then reset the password\"; else echo \"Grafana setup encountered an issue. Check Grafana service status using: sudo systemctl status grafana-server\"; fi; fi')]"
+        }
+    }
+],
+
+
             "securityProfile": {
                 "securityType": "[parameters('securityType')]",
                 "uefiSettings": {
@@ -213,7 +227,8 @@
     "outputs": {
         "SSH Instructions": {
             "type": "string",
-            "value": "[concat('SSH into the instance using the following command: \nssh -i <path-to-private-key>/<name-of-private-key> ', parameters('adminUsername'), '@', reference(resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))).ipAddress)]"
+            "value": "[concat('To SSH into the instance, use the following command:\nssh -i <path-to-private-key>/<name-of-private-key> ', parameters('adminUsername'), '@', reference(resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))).ipAddress, '\nPlease remember to change permissions of the private key with `chmod 400 <path-to-private-key>/<name-of-private-key>` before SSHing.')]"
+
         }
     }
 }
