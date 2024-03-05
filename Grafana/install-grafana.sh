@@ -19,6 +19,10 @@ else
     # Enable VM firewall to allow port 3000
     sudo firewall-cmd --zone=public --add-port=3000/tcp --permanent
 
+    # Uncomment the 'protocol' and 'http_port' lines in grafana.ini
+    sed -i 's/;protocol = http/protocol = http/' /etc/grafana/grafana.ini
+    sed -i 's/;http_port = 3000/http_port = 3000/' /etc/grafana/grafana.ini
+
     # Start Grafana
     sudo systemctl start grafana-server
 

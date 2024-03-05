@@ -125,12 +125,72 @@ This repo has the testing for Azure and AWS.
 
 For Azure:
 See directory 'Azure-ARM` for deployment of Grafana on Azure.
-- Deploying a whole infrastructure as in directory `ARM-VM-and-infra` 
-- Deploying only the RHEL VM (Must allow port 80 inbound in Network Security Group) 
+- Deploying a whole infrastructure in directory `ARM-VM-and-infra` 
+- Deploying only the RHEL VM (Must allow port 80 inbound in Network Security Group) in directory `ARM-VM-Only`
 
 For AWS:
 See directory `` for deployment of Grafana on AWS.
 - Deploying a whole infrastructure as in directory `ARM-VM-and-infra` 
 - Deploying only the RHEL EC2 instance (Must allow port 80 inbound in Network Security Group) 
+
+### Deploy ARM template to Azure
+
+1. In the azure portal, click the search bar up top and search for "Deploy a custom template".
+
+2. Select "Build your own template in the editor"
+
+3. Copy the template.json from the directory that has your use case.
+
+4. Paste the contents in the box and click "Save".
+
+5. Click "Edit parameters" and then copy and paste the respective template.parameters.json. Click "Save".
+
+6. Choose your resource group and SSH key from the drop box.
+
+7. Click "Review + create".
+
+8. After validation is complete, click "Create".
+
+9. The resources should deploy in the resource group using the deployment.
+
+10. When finished click Output for SSH information and `chmod` command to change private key permissions.
+
+11. When SSH into the Grafana VM, edit the grafana.ini ???
+
+`sudo nano /etc/grafana/grafana.ini`
+
+12. Uncomment by removing `;` from the following lines under Server
+```
+;protocol = http
+;http_port = 3000
+```
+
+13. Restart Grafana
+
+`sudo systemctl restart grafana-server`
+
+14. In a web browser, navigate to the URL making sure to replace with the public-IP you used to SSH with.
+
+`http://<Server-Public-IP>:3000`
+
+### Deploy Cloudformation template to AWS
+
+1. While logged into AWS portal, in the top search box search for "cloudformation".
+
+2. 
+
+3. 
+
+## Grafana UI
+
+The Grafana UI will allow you to connect to sources using the grafana agent and create dashboards of what needs to be monitored.
+
+### Connect to Sources
+
+1. 
+
+### Create a Grafana
+
+1. 
 
 ## Apply Best Security Practices to Grafana
