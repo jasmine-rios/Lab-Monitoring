@@ -116,24 +116,19 @@ The Grafana backend has a number of configuration options defined in its config 
 
 In this config file you can change things like the default admin password, http port, grafana database (sqlite3, mysql, postgres), authentication options (google, github, ldap, auth proxy) along with many other options.
 
-### 
-
 ## Testing Before Deployment
 
 Before deploying to PROD, test that it actually executes.
 This repo has the testing for Azure and AWS.
 
-For Azure:
-See directory 'Azure-ARM` for deployment of Grafana on Azure.
-- Deploying a whole infrastructure in directory `ARM-VM-and-infra` 
-- Deploying only the RHEL VM (Must allow port 80 inbound in Network Security Group) in directory `ARM-VM-Only`
+### Testing Deployment in Azure
+See directory `Azure-ARM` for deployment of Grafana on Azure either with VM and/or infrastructure (infra) 
 
-For AWS:
-See directory `` for deployment of Grafana on AWS.
-- Deploying a whole infrastructure as in directory `ARM-VM-and-infra` 
-- Deploying only the RHEL EC2 instance (Must allow port 80 inbound in Network Security Group) 
+- Deploying the whole infrastructure is in directory `ARM-VM-and-infra` and you use `template.json` for the deployment and `template.parameters.json` for the names of each resource.
 
-### Deploy ARM template to Azure
+- Deploying only the RHEL VM (Must allow 80,443, and 8080 inbound in Network Security Group) is in directory `ARM-VM-Only` and you use `template.json` for the deployment and `template.parameters.json` for the names of each resource.
+
+Follow these steps to deploy the respective `template.json` and `template.parameters.json` in the Azure portal:
 
 1. In the azure portal, click the search bar up top and search for "Deploy a custom template".
 
@@ -173,13 +168,41 @@ See directory `` for deployment of Grafana on AWS.
 
 `http://<Server-Public-IP>:3000`
 
-### Deploy Cloudformation template to AWS
+Follow these steps to deploy the respective `template.json` and `template.parameters.json` in the Azure portal:
+
+**NOTE**
+You must already have your ssh key uploaded in Azure CloudShell or CLI in order to create the deployment programatically.
+If you need to create the ssh key, use the portal to deploy the json files
+**NOTE**
+
+1. In the CloudShell (found on the Azure Portal on the left side with an icon of a box and a carrot, `>`, in the box) or Azure CLI use this command
+
+`az deployment create template.json --parameter template.paramaeters.json`
+
+### Testing Deployment in AWS
+
+See directory `AWS-Cloudformation` for deployment of Grafana on AWS.
+
+- Deploying a whole infrastructure is in directory `Cf-EC2-and-infra` and `grafana.yml` is what is used for CloudFormation
+
+- Deploying only the RHEL EC2 instance (Must allow ports 80,443, and 8080 inbound in Network Security Group) is in directory `Cf-EC2-only` and `grafana.yml` is what is used for CloudFormation
+
+Follow these steps to deploy the respective `grafana.yml` in AWS portal:
 
 1. While logged into AWS portal, in the top search box search for "cloudformation".
 
-2. 
+2. In CloudFormation, click 
 
 3. 
+
+Follow these steps to deploy the respective `grafana.yml` in AWS CLI:
+
+1. 
+
+2. 
+
+### Deploy Cloudformation template to AWS
+
 
 ## Grafana UI
 

@@ -82,7 +82,7 @@ Resources:
       Tags:
         - Key: Name
           Value: Grafana
-      UserData: Base64
+      UserData:
         Fn::Sub: |
           #!/bin/bash
           # Install Grafana using Yum

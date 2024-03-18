@@ -1,28 +1,34 @@
+#!/bin/bash
+
 # This is the script that downloads Prometheus for RHEL and other linux like distrubutions
 
 # Enable the primary port that Prometheus uses
 
 sudo firewall-cmd --zone=public --add-port=9090/tcp --permanent
 
-# Reload the firewall 
+# Step 1: Download Prometheus
+PROMETHEUS_VERSION="2.51.0-rc.0"
+sudo wget https://github.com/prometheus/prometheus/releases/download/v${PROMETHEUS_VERSION}/prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz
 
-sudo firewall-cmd --reload
+# Step 2: Extract Prometheus
+sudo tar -xvf prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz
 
-# Download prometheus
+# Step 3: Navigate to Prometheus directory
+cd prometheus-${PROMETHEUS_VERSION}.linux-amd64/
 
-sudo wget https://github.com/prometheus/prometheus/releases/download/v2.51.0-rc.0/prometheus-2.51.0-rc.0.linux-amd64.tar.gz
+# Step 4: Set permissions for Prometheus binary
+sudo chmod +x prometheus
 
-# Extract the tarball
+# Step 5: Create necessary directories
+mkdir -p data
 
-sudo tar -xvf prometheus-2.51.0-rc.0.linux-amd64.tar.gz
+# Step 6: Start Prometheus
+./prometheus --config.file=prometheus.yml
 
-# Change directories to the newly created directory
-
-cd prometheus-2.51.0-rc.0.linux-amd64
-
-# Once downloaded there will be a file called `prometheus.yml`
-# Configure the yaml file as needed for the intervals
-
-# Run the prometheus binary
-
-./prometheuss
+# Signal if Prometheus is running or not
+if systemctl is-active --quiet prometheus-server; then
+    echo "Prometheus is now running."
+    echo "To access the Prometheus UI, use the following URL in a supported browser:"
+    echo "http://<PublicIp>:9090"
+else
+    echo "Prometheus setup encountered an issue. Check prometheus service status using: sudo systemctl status prometheus-server"
