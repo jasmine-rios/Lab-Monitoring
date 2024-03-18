@@ -119,7 +119,7 @@ In this config file you can change things like the default admin password, http 
 ## Testing Before Deployment
 
 Before deploying to PROD, test that it actually executes.
-This repo has the testing for Azure and AWS.
+This repo has the testing in ARM for Azure and in CloudFormation for AWS located in directory `cloud-testing`
 
 ### Testing Deployment in Azure
 See directory `Azure-ARM` for deployment of Grafana on Azure either with VM and/or infrastructure (infra) 
