@@ -18,7 +18,7 @@ sudo tar -xvf prometheus-2.51.0-rc.0.linux-amd64.tar.gz
 
 # Change directories to the newly created directory
 
-cd prometheus-2.51.0.linux-amd64/
+cd prometheus-2.51.0-rc.0.linux-amd64
 
 # Once downloaded there will be a file called `prometheus.yml`
 # Configure the yaml file as needed for the intervals
