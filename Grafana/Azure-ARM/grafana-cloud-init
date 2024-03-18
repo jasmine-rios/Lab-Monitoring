@@ -1,0 +1,21 @@
+#cloud-config
+package_upgrade: true
+packages:
+  - grafana-enterprise # Install Grafana package
+
+runcmd:
+  - if systemctl is-active --quiet grafana-server; then
+      echo 'Grafana is already installed and running.';
+      echo 'To access the Grafana UI, use the following URL in a supported browser:';
+      echo 'http://<PublicIp>:3000';
+      echo 'Use 'admin' as the username and password, then reset the password';
+    else
+      sudo yum install -y https://dl.grafana.com/enterprise/release/grafana-enterprise-10.3.3-1.x86_64.rpm # Latest package, change if not latest
+      sudo systemctl enable grafana-server
+      sudo systemctl daemon-reload
+      sudo firewall-cmd --zone=public --add-port=3000/tcp --permanent
+      sudo sed -i 's/;protocol = http/protocol = http/' /etc/grafana/grafana.ini
+      sudo sed -i 's/;http_port = 3000/http_port = 3000/' /etc/grafana/grafana.ini
+      sudo systemctl start grafana-server
+      sudo systemctl status grafana-server
+  - fi
