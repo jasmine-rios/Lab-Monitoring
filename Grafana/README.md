@@ -52,7 +52,7 @@ Minimum Hardware recommendations for Grafana alone:
 Minumum Hardware recommendations for Grafana, Prometheus, and Prometheus Gatway on one server based on 50 hosts and log retention of 14 days:
 - 550 GB Storage
 - 4 CPU Cores
-- 7 GB RAM 
+- 8 GB RAM 
 
 Supported databases must be used to store configuration data like users, data sources, and dashboards.
 The requirements depend on the size of the Grafana installation and features you use.
@@ -139,11 +139,41 @@ Follow the `README.md` in that directory
 
 The Grafana UI will allow you to connect to sources using the grafana agent and create dashboards of what needs to be monitored.
 
-### Connect to Sources
+### Connect to Sources: Prometheus
 
-1. 
+You can add prometheus as a data source in the UI by signing into Grafana with `admin` and the password you set.
 
-### Create a Grafana
+Or you can progmatically add it using `integrate-prom-in-graf.sh` and set the variables to what is applicable to you.
+
+#### Connect to Prometheus in Grafana UI
+
+1. While in the Grafana UI homepage, You should see a tile that says "Add your first data source", click it.
+
+If that tile is not there, click the menu button on the upper left and click Connections>Add new connection and search for "prometheus" then click "Add new data source"
+
+2. Now on the newly created data source for prometheus, click in the box under Connection, next to "Prometheus server URL".
+
+3. Type in the URL you used to connect to prometheus, which is the server IP hosting prometheus and it's default port
+
+`http://<Enter-server-ip>:9090
+
+4. You can change other defaults such as Authentication methods, TLS, HTTP headers, and advanced settings.
+
+In the tab next to settings near the top of the page, you can click Dashboards and import dashboards or build your own.
+
+5. Click "Save & Test" and you should get a message at the bottom that reads "Successfully queried the Prometheus API. Next, you can start to visualize data by building a dashboard, or by querying data in the Explore view"
+
+### Create a Grafana dashboard
+
+There are numerous ways to create a dashboard in the Grafana UI:
+
+- Choose a baseline dashboard when connecting prometheus as a data source in the "Dashboards" tab and import then click it
+- Click the success message hyperlink that says "building a dashboard"
+- Click the "Build a dashboard" in the prometheus dashboard
+
+You can also create a dashboard programmatically using JSON model
+
+(Dashboard JSON Model)[https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/view-dashboard-json-model/]
 
 1. 
 

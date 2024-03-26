@@ -20,6 +20,9 @@ sudo chmod +x prometheus
 # Create necessary directories
 sudo mkdir -p /etc/prometheus/data
 
+# Move configuration file to /etc/prometheus/ directory
+sudo mv prometheus.yml /etc/prometheus/
+
 # Create Prometheus service file
 sudo tee /etc/systemd/system/prometheus.service <<EOF
 [Unit]
@@ -52,4 +55,6 @@ if systemctl is-active --quiet prometheus; then
     echo "http://<PublicIp>:9090"
 else
     echo "Prometheus setup encountered an issue. Check Prometheus service status using: sudo systemctl status prometheus"
+    echo "If it shows as failed, run: sudo ./prometheus --config.file=prometheus.yml"
+
 fi

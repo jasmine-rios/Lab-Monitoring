@@ -59,3 +59,6 @@ scrape_configs:
 
 ## Integrate Prometheus with Grafana
 
+## Problems
+
+- Having issues with systemctl but prometheus is still able to run after script and be accessed with `sudo ./prometheus --config.file=prometheus.yml`
