@@ -1,34 +1,55 @@
 #!/bin/bash
 
-# This is the script that downloads Prometheus for RHEL and other linux like distrubutions
+# Ensure necessary tools are installed
+sudo yum install -y wget tar
 
-# Enable the primary port that Prometheus uses
+# Prompt users to upload Prometheus package
+echo "Please upload the Prometheus package (tar.gz file) to the server and provide the full path:"
+read -p "Prometheus Package Path: " PROMETHEUS_PACKAGE_PATH
 
-sudo firewall-cmd --zone=public --add-port=9090/tcp --permanent
+# Extract Prometheus
+sudo tar -xvf "$PROMETHEUS_PACKAGE_PATH" -C /usr/local/bin/
 
-# Step 1: Download Prometheus
-PROMETHEUS_VERSION="2.51.0-rc.0"
-sudo wget https://github.com/prometheus/prometheus/releases/download/v${PROMETHEUS_VERSION}/prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz
+# Navigate to Prometheus directory
+PROMETHEUS_VERSION=$(basename "$PROMETHEUS_PACKAGE_PATH" .tar.gz)
+cd "/usr/local/bin/prometheus-${PROMETHEUS_VERSION}.linux-amd64/"
 
-# Step 2: Extract Prometheus
-sudo tar -xvf prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz
-
-# Step 3: Navigate to Prometheus directory
-cd prometheus-${PROMETHEUS_VERSION}.linux-amd64/
-
-# Step 4: Set permissions for Prometheus binary
+# Set permissions for Prometheus binary
 sudo chmod +x prometheus
 
-# Step 5: Create necessary directories
-mkdir -p data
+# Create necessary directories
+sudo mkdir -p /etc/prometheus/data
 
-# Step 6: Start Prometheus
-./prometheus --config.file=prometheus.yml
+# Create Prometheus service file
+sudo tee /etc/systemd/system/prometheus.service <<EOF
+[Unit]
+Description=Prometheus Monitoring
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/etc/prometheus/data
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable and start Prometheus service
+sudo systemctl daemon-reload
+sudo systemctl enable prometheus
+sudo systemctl start prometheus
+
+# Allow Prometheus port through firewall
+sudo firewall-cmd --zone=public --add-port=9090/tcp --permanent
+sudo firewall-cmd --reload
 
 # Signal if Prometheus is running or not
-if systemctl is-active --quiet prometheus-server; then
-    echo "Prometheus is now running."
+if systemctl is-active --quiet prometheus; then
+    echo "Prometheus is now running as a systemd service."
     echo "To access the Prometheus UI, use the following URL in a supported browser:"
     echo "http://<PublicIp>:9090"
 else
-    echo "Prometheus setup encountered an issue. Check prometheus service status using: sudo systemctl status prometheus-server"
+    echo "Prometheus setup encountered an issue. Check Prometheus service status using: sudo systemctl status prometheus"
+fi

@@ -9,15 +9,20 @@ Grafana Alerting monitors your network and alerts to an action group when certai
 
 Grafana integrates with communication platforms such as Slack, email using alerts. 
 
-### Data Sources
+### Data Sources with Prometheus
 
 Data sources are the things that you want to monitor with Grafana.
 Examples of these data sources are cloud hosted services, on-premises services, and databases.
 
 Data sources are installed with an agent that communicates with the Grafana instance.
+
+You can use Prometheus as the agent that connects to these servers.
+
+Follow the Prometheus `README.md` to install it either alone or with a gateway.
+
 Through the communications you can see network performance on a customizable dashboard.
+
 In that dashboard you have panels which is the choice of what metric you want to monitor.
-Some monitored metrics include I/O profromance, bandwidth usage, latency, packet loss, and interface statistics.
 
 ### Log Analysis
 
@@ -37,9 +42,17 @@ Grafana can be installed on many operating systems:
 
 You can install it on other operating systems but it is not recommended or supported.
 
-Minimum Hardware recommendations:
-- 512 MB memory
-- 1 CPU 
+Have the following hardware to start off with but grow it as needed.
+
+Minimum Hardware recommendations for Grafana alone:
+- 512 MB Storage (just for configurations)
+- 2 CPU cores
+- 2-4 GB RAM
+
+Minumum Hardware recommendations for Grafana, Prometheus, and Prometheus Gatway on one server based on 50 hosts and log retention of 14 days:
+- 550 GB Storage
+- 4 CPU Cores
+- 7 GB RAM 
 
 Supported databases must be used to store configuration data like users, data sources, and dashboards.
 The requirements depend on the size of the Grafana installation and features you use.
@@ -120,89 +133,7 @@ In this config file you can change things like the default admin password, http 
 
 Before deploying to PROD, test that it actually executes.
 This repo has the testing in ARM for Azure and in CloudFormation for AWS located in directory `cloud-testing`
-
-### Testing Deployment in Azure
-See directory `Azure-ARM` for deployment of Grafana on Azure either with VM and/or infrastructure (infra) 
-
-- Deploying the whole infrastructure is in directory `ARM-VM-and-infra` and you use `template.json` for the deployment and `template.parameters.json` for the names of each resource.
-
-- Deploying only the RHEL VM (Must allow 80,443, and 8080 inbound in Network Security Group) is in directory `ARM-VM-Only` and you use `template.json` for the deployment and `template.parameters.json` for the names of each resource.
-
-Follow these steps to deploy the respective `template.json` and `template.parameters.json` in the Azure portal:
-
-1. In the azure portal, click the search bar up top and search for "Deploy a custom template".
-
-2. Select "Build your own template in the editor"
-
-3. Copy the template.json from the directory that has your use case.
-
-4. Paste the contents in the box and click "Save".
-
-5. Click "Edit parameters" and then copy and paste the respective template.parameters.json. Click "Save".
-
-6. Choose your resource group and SSH key from the drop box.
-
-7. Click "Review + create".
-
-8. After validation is complete, click "Create".
-
-9. The resources should deploy in the resource group using the deployment.
-
-10. When finished click Output for SSH information and `chmod` command to change private key permissions.
-
-11. When SSH into the Grafana VM, edit the grafana.ini ???
-
-`sudo nano /etc/grafana/grafana.ini`
-
-12. Uncomment by removing `;` from the following lines under Server
-```
-;protocol = http
-;http_port = 3000
-```
-
-13. Restart Grafana
-
-`sudo systemctl restart grafana-server`
-
-14. In a web browser, navigate to the URL making sure to replace with the public-IP you used to SSH with.
-
-`http://<Server-Public-IP>:3000`
-
-Follow these steps to deploy the respective `template.json` and `template.parameters.json` in the Azure portal:
-
-**NOTE**
-You must already have your ssh key uploaded in Azure CloudShell or CLI in order to create the deployment programatically.
-If you need to create the ssh key, use the portal to deploy the json files
-**NOTE**
-
-1. In the CloudShell (found on the Azure Portal on the left side with an icon of a box and a carrot, `>`, in the box) or Azure CLI use this command
-
-`az deployment create template.json --parameter template.paramaeters.json`
-
-### Testing Deployment in AWS
-
-See directory `AWS-Cloudformation` for deployment of Grafana on AWS.
-
-- Deploying a whole infrastructure is in directory `Cf-EC2-and-infra` and `grafana.yml` is what is used for CloudFormation
-
-- Deploying only the RHEL EC2 instance (Must allow ports 80,443, and 8080 inbound in Network Security Group) is in directory `Cf-EC2-only` and `grafana.yml` is what is used for CloudFormation
-
-Follow these steps to deploy the respective `grafana.yml` in AWS portal:
-
-1. While logged into AWS portal, in the top search box search for "cloudformation".
-
-2. In CloudFormation, click 
-
-3. 
-
-Follow these steps to deploy the respective `grafana.yml` in AWS CLI:
-
-1. 
-
-2. 
-
-### Deploy Cloudformation template to AWS
-
+Follow the `README.md` in that directory
 
 ## Grafana UI
 
