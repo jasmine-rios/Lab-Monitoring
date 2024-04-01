@@ -66,6 +66,38 @@
 				}		
 			]
 		},
+		"networkSecurityGroupRulesHosts": {
+			"value": [
+			{
+				"name": "Prometheus",
+				"properties": {
+					"priority": 310,
+					"protocol": "TCP",
+					"access": "Allow",
+					"direction": "Inbound",
+					"sourceAddressPrefix": "*",
+					"sourcePortRange": "*",
+					"destinationAddressPrefix": "*",
+					"destinationPortRange": "9090",
+					"description": "Allow inbound default Prometheus port"
+				}
+			},
+			{
+				"name": "HTTP",
+				"properties": {
+					"priority": 320,
+					"protocol": "TCP",
+					"access": "Allow",
+					"direction": "Inbound",
+					"sourceAddressPrefix": "*",
+					"sourcePortRange": "*",
+					"destinationAddressPrefix": "*",
+					"destinationPortRange": "80",
+					"description": "AllowAnyHTTPInbound"
+				}
+			}
+		]
+		},
 		"publicIpAddressName": {
 			"value": "grafana-publicIP"
 		},
@@ -74,6 +106,12 @@
 		},
 		"publicIpAddressSku": {
 			"value": "Standard"
+		},
+		"publicIpAddressNameHost1": {
+			"value": "grafana-publicIP"
+		},
+		"publicIpAddressNameHost2": {
+			"value": "grafana-publicIP"
 		},
 		"virtualMachineName": {
 			"value": "grafana-RHEL"

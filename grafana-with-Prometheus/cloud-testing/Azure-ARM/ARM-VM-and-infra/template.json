@@ -27,6 +27,9 @@
         "networkSecurityGroupRules": {
             "type": "array"
         },
+        "networkSecurityGroupRulesHosts": {
+            "type": "array"
+        },
         "publicIpAddressName": {
             "type": "string"
         },
@@ -36,6 +39,12 @@
         "publicIpAddressSku": {
             "type": "string"
         },
+        "publicIpAddressNameHost1": {
+			"type": "string"
+		},
+		"publicIpAddressNameHost2": {
+			"type": "string"
+		},
         "virtualMachineName": {
             "type": "string"
         },
@@ -95,9 +104,15 @@
             },
             "subnets": [
                 {
-                    "name": "Grafana-Subnet",
+                    "name": "[parameters('Subnet1')]",
                     "properties": {
                         "addressPrefix": "10.0.1.0/24"
+                    }
+                },
+                {
+                    "name": "[parameters('Subnet2')]",
+                    "properties": {
+                        "addressPrefix": "10.0.2.0/24"
                     }
                 }
             ]
@@ -123,7 +138,7 @@
                     "name": "ipconfig1",
                     "properties": {
                         "subnet": {
-                            "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/Grafana-Subnet')]"
+                            "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/', parameters('Subnet1'))]"
                         },
                         "privateIPAllocationMethod": "Dynamic",
                         "publicIpAddress": {
@@ -134,6 +149,74 @@
             ],
             "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+            }
+        },
+        "tags": {
+            "Template by": "Jasmine Rios",
+            "Project": "Grafana"
+        }
+    },
+    {
+        "name": "[parameters('networkInterfaceNameHost1')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "2022-11-01",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHosts'))]",
+            "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressNameHost1'))]",
+            "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
+        ],
+        "properties": {
+            "ipConfigurations": [
+                {
+                    "name": "ipconfig1",
+                    "properties": {
+                        "subnet": {
+                            "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/', parameters('Subnet1'))]"
+                        },
+                        "privateIPAllocationMethod": "Dynamic",
+                        "publicIpAddress": {
+                            "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressNameHost1'))]"
+                        }
+                    }
+                }
+            ],
+            "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameHosts'))]"
+            }
+        },
+        "tags": {
+            "Template by": "Jasmine Rios",
+            "Project": "Grafana"
+        }
+    },
+        {
+        "name": "[parameters('networkInterfaceNameHost2')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "2022-11-01",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHosts'))]",
+            "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressNameHost2'))]",
+            "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
+        ],
+        "properties": {
+            "ipConfigurations": [
+                {
+                    "name": "ipconfig1",
+                    "properties": {
+                        "subnet": {
+                            "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/', parameters('Subnet2'))]"
+                        },
+                        "privateIPAllocationMethod": "Dynamic",
+                        "publicIpAddress": {
+                            "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressNameHost2'))]"
+                        }
+                    }
+                }
+            ],
+            "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameHosts'))]"
             }
         },
         "tags": {
@@ -155,7 +238,52 @@
         }
     },
     {
+        "name": "[parameters('networkSecurityGroupNameHosts')]",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "apiVersion": "2019-02-01",
+        "location": "[parameters('location')]",
+        "properties": {
+            "securityRules": "[parameters('networkSecurityGroupRulesHosts')]"
+        },
+        "tags": {
+            "Template by": "Jasmine Rios",
+            "Project": "Grafana"
+        }
+    },
+    {
         "name": "[parameters('publicIpAddressName')]",
+        "type": "Microsoft.Network/publicIpAddresses",
+        "apiVersion": "2019-02-01",
+        "location": "[parameters('location')]",
+        "properties": {
+            "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
+        },
+        "sku": {
+            "name": "[parameters('publicIpAddressSku')]"
+        },
+        "tags": {
+            "Template by": "Jasmine Rios",
+            "Project": "Grafana"
+        }
+    },
+        {
+        "name": "[parameters('publicIpAddressNameHost1')]",
+        "type": "Microsoft.Network/publicIpAddresses",
+        "apiVersion": "2019-02-01",
+        "location": "[parameters('location')]",
+        "properties": {
+            "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
+        },
+        "sku": {
+            "name": "[parameters('publicIpAddressSku')]"
+        },
+        "tags": {
+            "Template by": "Jasmine Rios",
+            "Project": "Grafana"
+        }
+    },
+            {
+        "name": "[parameters('publicIpAddressNameHost2')]",
         "type": "Microsoft.Network/publicIpAddresses",
         "apiVersion": "2019-02-01",
         "location": "[parameters('location')]",
@@ -218,7 +346,7 @@
     "osProfile": {
         "computerName": "[parameters('virtualMachineName')]",
         "adminUsername": "[parameters('adminUsername')]",
-        "customData": ["base64('#cloud-config\\npackage_upgrade: true\\npackages:\\n  - grafana-enterprise # Install Grafana package\\n\\nruncmd:\\n  - if systemctl is-active --quiet grafana-server; then echo \\\"Grafana is already installed and running.\\\"; echo \\\"To access the Grafana UI, use the following URL in a supported browser:\\\"; echo \\\"http://<PublicIp>:3000\\\"; echo \\\"Use admin as the username and password, then reset the password\\\"; else sudo yum install -y https://dl.grafana.com/enterprise/release/grafana-enterprise-10.3.3-1.x86_64.rpm # Latest package, change if not latest; sudo systemctl enable grafana-server; sudo systemctl daemon-reload; sudo firewall-cmd --zone=public --add-port=3000/tcp --permanent; sudo sed -i 's/;protocol = http/protocol = http/' /etc/grafana/grafana.ini; sudo sed -i 's/;http_port = 3000/http_port = 3000/' /etc/grafana/grafana.ini; sudo systemctl start grafana-server; sudo systemctl status grafana-server; fi')"],
+        "customData": "base64('#cloud-config\\npackage_upgrade: true\\npackages:\\n  - grafana-enterprise # Install Grafana package\\n\\nruncmd:\\n  - if systemctl is-active --quiet grafana-server; then echo \\\"Grafana is already installed and running.\\\"; echo \\\"To access the Grafana UI, use the following URL in a supported browser:\\\"; echo \\\"http://<PublicIp>:3000\\\"; echo \\\"Use admin as the username and password, then reset the password\\\"; else sudo yum install -y https://dl.grafana.com/enterprise/release/grafana-enterprise-10.3.3-1.x86_64.rpm # Latest package, change if not latest; sudo systemctl enable grafana-server; sudo systemctl daemon-reload; sudo firewall-cmd --zone=public --add-port=3000/tcp --permanent; sudo sed -i 's/;protocol = http/protocol = http/' /etc/grafana/grafana.ini; sudo sed -i 's/;http_port = 3000/http_port = 3000/' /etc/grafana/grafana.ini; sudo systemctl start grafana-server; sudo systemctl status grafana-server; fi')",
       "linuxConfiguration": {
         "disablePasswordAuthentication": true,
         "ssh": {
@@ -284,6 +412,58 @@
     },
     "osProfile": {
         "computerName": "[parameters('virtualMachineHost1Name')]",
+        "adminUsername": "[parameters('adminUsername')]",
+        "customData": null
+    }
+  }
+},
+{
+  "name": "[parameters('virtualMachineHost2Name')]",
+  "type": "Microsoft.Compute/virtualMachines",
+  "apiVersion": "2021-03-01",
+  "location": "[parameters('location')]",
+  "dependsOn": [
+    "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceNameHost2'))]"
+  ],
+  "properties": {
+    "hardwareProfile": {
+      "vmSize": "[parameters('virtualMachineSizeHosts')]"
+    },
+    "securityProfile": {
+        "securityType": "[parameters('securityType')]",
+        "uefiSettings": {
+            "secureBootEnabled": "[parameters('secureBoot')]",
+            "vTpmEnabled": "[parameters('vTPM')]"
+        }
+  },
+    "diagnosticsProfile": {
+        "bootDiagnostics": {
+            "enabled": true
+        }
+    },
+    "storageProfile": {
+      "osDisk": {
+        "createOption": "fromImage",
+        "managedDisk": {
+          "storageAccountType": "[parameters('osDiskType')]"
+        }
+      },
+      "imageReference": {
+        "publisher": "Microsoft",
+        "offer": "Windows",
+        "sku": "92_gen2",
+        "version": "latest"
+      }
+    },
+    "networkProfile": {
+      "networkInterfaces": [
+        {
+          "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceNameHost2'))]"
+        }
+      ]
+    },
+    "osProfile": {
+        "computerName": "[parameters('virtualMachineHost2Name')]",
         "adminUsername": "[parameters('adminUsername')]",
         "customData": null
     }
