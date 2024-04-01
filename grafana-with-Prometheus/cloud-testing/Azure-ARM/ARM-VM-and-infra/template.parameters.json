@@ -6,11 +6,20 @@
 			"value":"eastus"
 		},
 		"networkInterfaceName": {
-			"value": "Grafana-NI"
+			"value": "grafana-NI"
 		},
+		"networkInterfaceNameHost1": {
+            "value": "grafana-host1-NI"
+        },
+        "networkInterfaceNameHost2": {
+            "value": "grafana-host2-NI"
+        },
 		"networkSecurityGroupName": {
-			"value": "Grafana-NSG"
+			"value": "grafana-NSG"
 		},
+		"networkSecurityGroupNameHosts": {
+            "value": "grafana-hosts-NSG"
+        },
 		"networkSecurityGroupRules": {
 			"value": [
 				{
@@ -28,7 +37,7 @@
 					}
 				},
 				{
-					"name": "Grafana",
+					"name": "grafana",
 					"properties": {
 						"priority": 310,
 						"protocol": "TCP",
@@ -58,7 +67,7 @@
 			]
 		},
 		"publicIpAddressName": {
-			"value": "Grafana-PublicIP"
+			"value": "grafana-publicIP"
 		},
 		"publicIpAddressType": {
 			"value": "Static"
@@ -67,14 +76,23 @@
 			"value": "Standard"
 		},
 		"virtualMachineName": {
-			"value": "Grafana-RHEL"
+			"value": "grafana-RHEL"
 		},
+		"virtualMachineHost1Name": {
+            "value": "grafana-host1-ubuntu"
+        },
+        "virtualMachineHost2Name": {
+            "value": "grafana-host1-win"
+        },
 		"osDiskType": {
 			"value": "Premium_LRS"
 		},
 		"virtualMachineSize": {
 			"value": "Standard_B2s"
 		},
+		"virtualMachineSizeHosts": {
+            "value": "Standard_DS1_v2"
+        },
 		"adminUsername": {
 			"value": "azureuser"
 		},
@@ -91,7 +109,13 @@
 			"value": "string"
 		},
 		"virtualNetworkName": {
-			"value": "Grafana-VNet"
-		}
+			"value": "grafana-VNet"
+		},
+		"Subnet1": {
+            "value": "grafana-subnet1"
+        },
+        "Subnet2": {
+            "value": "grafana-subnet2"
+        }
 	}
 }

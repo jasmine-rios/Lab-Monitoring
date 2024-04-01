@@ -12,7 +12,16 @@
         "networkInterfaceName": {
             "type": "string"
         },
+        "networkInterfaceNameHost1": {
+            "type": "string"
+        },
+        "networkInterfaceNameHost2": {
+            "type": "string"
+        },
         "networkSecurityGroupName": {
+            "type": "string"
+        },
+        "networkSecurityGroupNameHosts": {
             "type": "string"
         },
         "networkSecurityGroupRules": {
@@ -30,10 +39,19 @@
         "virtualMachineName": {
             "type": "string"
         },
+        "virtualMachineHost1Name": {
+            "type": "string"
+        },
+        "virtualMachineHost2Name": {
+            "type": "string"
+        },
         "osDiskType": {
             "type": "string"
         },
         "virtualMachineSize": {
+            "type": "string"
+        },
+        "virtualMachineSizeHosts": {
             "type": "string"
         },
         "adminUsername": {
@@ -52,6 +70,12 @@
             "type": "string"
         },
         "virtualNetworkName": {
+            "type": "string"
+        },
+        "Subnet1": {
+            "type": "string"
+        },
+        "Subnet2": {
             "type": "string"
         }
     },
@@ -194,7 +218,7 @@
     "osProfile": {
         "computerName": "[parameters('virtualMachineName')]",
         "adminUsername": "[parameters('adminUsername')]",
-        "customData": "[base64('#cloud-config\npackage_upgrade: true\npackages:\n  - grafana-enterprise # Install Grafana package\n\nruncmd:\n  - if systemctl is-active --quiet grafana-server; then echo \"Grafana is already installed and running.\"; echo \"To access the Grafana UI, use the following URL in a supported browser:\"; echo \"http://<PublicIp>:3000\"; echo \"Use admin as the username and password, then reset the password\"; else sudo yum install -y https://dl.grafana.com/enterprise/release/grafana-enterprise-10.3.3-1.x86_64.rpm # Latest package, change if not latest; sudo systemctl enable grafana-server; sudo systemctl daemon-reload; sudo firewall-cmd --zone=public --add-port=3000/tcp --permanent; sudo sed -i 's/;protocol = http/protocol = http/' /etc/grafana/grafana.ini; sudo sed -i 's/;http_port = 3000/http_port = 3000/' /etc/grafana/grafana.ini; sudo systemctl start grafana-server; sudo systemctl status grafana-server; fi')]",
+        "customData": ["base64('#cloud-config\\npackage_upgrade: true\\npackages:\\n  - grafana-enterprise # Install Grafana package\\n\\nruncmd:\\n  - if systemctl is-active --quiet grafana-server; then echo \\\"Grafana is already installed and running.\\\"; echo \\\"To access the Grafana UI, use the following URL in a supported browser:\\\"; echo \\\"http://<PublicIp>:3000\\\"; echo \\\"Use admin as the username and password, then reset the password\\\"; else sudo yum install -y https://dl.grafana.com/enterprise/release/grafana-enterprise-10.3.3-1.x86_64.rpm # Latest package, change if not latest; sudo systemctl enable grafana-server; sudo systemctl daemon-reload; sudo firewall-cmd --zone=public --add-port=3000/tcp --permanent; sudo sed -i 's/;protocol = http/protocol = http/' /etc/grafana/grafana.ini; sudo sed -i 's/;http_port = 3000/http_port = 3000/' /etc/grafana/grafana.ini; sudo systemctl start grafana-server; sudo systemctl status grafana-server; fi')"],
       "linuxConfiguration": {
         "disablePasswordAuthentication": true,
         "ssh": {
@@ -211,6 +235,58 @@
   "tags": {
     "Template by": "Jasmine Rios",
     "Project": "Grafana"
+  }
+},
+{
+  "name": "[parameters('virtualMachineHost1Name')]",
+  "type": "Microsoft.Compute/virtualMachines",
+  "apiVersion": "2021-03-01",
+  "location": "[parameters('location')]",
+  "dependsOn": [
+    "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceNameHost1'))]"
+  ],
+  "properties": {
+    "hardwareProfile": {
+      "vmSize": "[parameters('virtualMachineSizeHosts')]"
+    },
+    "securityProfile": {
+        "securityType": "[parameters('securityType')]",
+        "uefiSettings": {
+            "secureBootEnabled": "[parameters('secureBoot')]",
+            "vTpmEnabled": "[parameters('vTPM')]"
+        }
+  },
+    "diagnosticsProfile": {
+        "bootDiagnostics": {
+            "enabled": true
+        }
+    },
+    "storageProfile": {
+      "osDisk": {
+        "createOption": "fromImage",
+        "managedDisk": {
+          "storageAccountType": "[parameters('osDiskType')]"
+        }
+      },
+      "imageReference": {
+        "publisher": "canonical",
+        "offer": "",
+        "sku": "92_gen2",
+        "version": "latest"
+      }
+    },
+    "networkProfile": {
+      "networkInterfaces": [
+        {
+          "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceNameHost1'))]"
+        }
+      ]
+    },
+    "osProfile": {
+        "computerName": "[parameters('virtualMachineHost1Name')]",
+        "adminUsername": "[parameters('adminUsername')]",
+        "customData": null
+    }
   }
 }
 ],
