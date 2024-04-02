@@ -12,15 +12,15 @@ sudo setenforce 0
 
 sudo yum install -y gcc glibc glibc-common make gettext automake autoconf wget unzip openssl-devel net-snmp net-snmp-utils httpd httpd-tools php gd gd-devel perl postfix perl
 
-sudo yum update -y
+sudo sudo yum update -y
 
 # Download Nagios Core
 
 cd ~
 
-wget -O nagioscore.tar.gz https://github.com/NagiosEnterprises/nagioscore/releases/download/nagios-4.5.0/nagios-4.5.0.tar.gz
+sudo wget -O nagioscore.tar.gz https://github.com/NagiosEnterprises/nagioscore/releases/download/nagios-4.5.0/nagios-4.5.0.tar.gz
 
-tar -xvzf nagios-4.5.0.tar.gz
+sudo tar -xvzf nagios-4.5.0.tar.gz
 
 #nagios 4.5.0 is the latest version as of now
 
@@ -109,12 +109,12 @@ sudo systemctl start nagios
 
 cd /tmp
 
-wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+sudo wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
 sudo rpm -ihv epel-release-latest-8.noarch.rpm
 
 subscription-manager repos --enable=rhel-8-server-optional-rpms
 
-yum install -y gcc glibc glibc-common make gettext automake autoconf wget openssl-devel net-snmp net-snmp-utils
+sudo yum install -y gcc glibc glibc-common make gettext automake autoconf wget openssl-devel net-snmp net-snmp-utils
 
-yum install -y perl-Net-SNMP
+sudo yum install -y perl-Net-SNMP

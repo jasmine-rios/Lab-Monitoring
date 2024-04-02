@@ -17,8 +17,11 @@
 		"networkSecurityGroupName": {
 			"value": "grafana-NSG"
 		},
-		"networkSecurityGroupNameHosts": {
-            "value": "grafana-hosts-NSG"
+		"networkSecurityGroupNameHost1": {
+            "value": "grafana-host2-NSG"
+        },
+		"networkSecurityGroupNameHost2": {
+            "value": "string"
         },
 		"networkSecurityGroupRules": {
 			"value": [
@@ -61,14 +64,56 @@
 						"sourcePortRange": "*",
 						"destinationAddressPrefix": "*",
 						"destinationPortRange": "80",
-						"description": "AllowAnyHTTPInbound"
+						"description": "Allow Any HTTP Inbound to serve webpages for Grafana and Prometheus"
 					}
-				}		
+				},
+				{
+					"name": "Prometheus",
+					"properties": {
+						"priority": 330,
+						"protocol": "TCP",
+						"access": "Allow",
+						"direction": "Inbound",
+						"sourceAddressPrefix": "*",
+						"sourcePortRange": "*",
+						"destinationAddressPrefix": "*",
+						"destinationPortRange": "9090",
+						"description": "Allow inbound default Prometheus port"
+					}
+				},
+				{
+					"name": "Prometheus-gateway",
+					"properties": {
+						"priority": 340,
+						"protocol": "TCP",
+						"access": "Allow",
+						"direction": "Inbound",
+						"sourceAddressPrefix": "*",
+						"sourcePortRange": "*",
+						"destinationAddressPrefix": "*",
+						"destinationPortRange": "9091",
+						"description": "Allow inbound default Prometheus gateway port"
+					}
+				}
 			]
 		},
-		"networkSecurityGroupRulesHosts": {
+		"networkSecurityGroupRulesHost1": {
 			"value": [
-			{
+				{
+					"name": "SSH",
+					"properties": {
+						"priority": 300,
+						"protocol": "TCP",
+						"access": "Allow",
+						"direction": "Inbound",
+						"sourceAddressPrefix": "*",
+						"sourcePortRange": "*",
+						"destinationAddressPrefix": "*",
+						"destinationPortRange": "22",
+						"description": "Allow inbound SSH traffic from anywhere."
+					}
+				},
+				{
 				"name": "Prometheus",
 				"properties": {
 					"priority": 310,
@@ -81,19 +126,37 @@
 					"destinationPortRange": "9090",
 					"description": "Allow inbound default Prometheus port"
 				}
-			},
-			{
-				"name": "HTTP",
+			}
+		]
+		},
+		"networkSecurityGroupRulesHost2": {
+			"value": [
+				{
+					"name": "SSH",
+					"properties": {
+						"priority": 300,
+						"protocol": "TCP",
+						"access": "Allow",
+						"direction": "Inbound",
+						"sourceAddressPrefix": "*",
+						"sourcePortRange": "*",
+						"destinationAddressPrefix": "*",
+						"destinationPortRange": "22",
+						"description": "Allow inbound SSH traffic from anywhere."
+					}
+				},
+				{
+				"name": "Prometheus-gateway",
 				"properties": {
-					"priority": 320,
+					"priority": 310,
 					"protocol": "TCP",
 					"access": "Allow",
 					"direction": "Inbound",
 					"sourceAddressPrefix": "*",
 					"sourcePortRange": "*",
 					"destinationAddressPrefix": "*",
-					"destinationPortRange": "80",
-					"description": "AllowAnyHTTPInbound"
+					"destinationPortRange": "9091",
+					"description": "Allow inbound default Prometheus gateway port"
 				}
 			}
 		]

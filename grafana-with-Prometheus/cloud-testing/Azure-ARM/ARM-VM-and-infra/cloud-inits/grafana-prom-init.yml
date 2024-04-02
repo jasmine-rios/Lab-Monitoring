@@ -1,11 +1,9 @@
 #cloud-config
 package_upgrade: true
 packages:
-  - grafana-enterprise # Install Grafana package
-  - # Installs Prometheus Package
-
 runcmd:
-  - sudo yum install -y https://dl.grafana.com/enterprise/release/grafana-enterprise-10.3.3-1.x86_64.rpm # Latest package, change if not latest
+  - sudo wget -O grafana.tar.gz https://dl.grafana.com/enterprise/release/grafana-enterprise-10.3.3-1.x86_64.rpm
+  - sudo tar -xvzf grafana.tar.gz -C /usr/local/bin/
   - sudo systemctl enable grafana-server
   - sudo systemctl daemon-reload
   - sudo firewall-cmd --zone=public --add-port=3000/tcp --permanent
@@ -19,14 +17,11 @@ runcmd:
      echo 'http://<PublicIp>:3000';
      echo 'Use 'admin' as the username and password, then reset the password';
     else
-     echo "Grafana setup encountered an issue. Check Grafana service status using: sudo systemctl status prometheus"
+     echo "Grafana setup encountered an issue. Check Grafana service status using sudo systemctl status prometheus"
   - fi 
-  sudo yum install -y wget tar
-  - echo "Please upload the Prometheus package (tar.gz file) to the server and provide the full path:"
-  - read -p "Prometheus Package Path: " PROMETHEUS_PACKAGE_PATH
-  - sudo tar -xvf "$PROMETHEUS_PACKAGE_PATH" -C /usr/local/bin/
-  - PROMETHEUS_VERSION=$(basename "$PROMETHEUS_PACKAGE_PATH" .tar.gz)
-  - cd "/usr/local/bin/prometheus-${PROMETHEUS_VERSION}.linux-amd64/"
+  - sudo wget -O prometheus.tar.gz https://github.com/prometheus/prometheus/releases/download/v2.51.1/prometheus-2.51.1.linux-amd64.tar.gz
+  - sudo tar -xvf prometheus.tar.gz -C /usr/local/bin/
+  - cd "/usr/local/bin/prometheus.tar.gz"
   - sudo chmod +x prometheus
   - sudo mkdir -p /etc/prometheus/data
   - sudo mv prometheus.yml /etc/prometheus/
@@ -54,6 +49,7 @@ runcmd:
     echo "To access the Prometheus UI, use the following URL in a supported browser:"
     echo "http://<PublicIp>:9090"
     else
-      echo "Prometheus setup encountered an issue. Check Prometheus service status using: sudo systemctl status prometheus"
-      echo "If it shows as failed, run: sudo ./prometheus --config.file=prometheus.yml"
+      echo "Prometheus setup encountered an issue. Check Prometheus service status using sudo systemctl status prometheus"
+      echo "If it shows as failed, run sudo ./prometheus --config.file=prometheus.yml"
   - fi
+

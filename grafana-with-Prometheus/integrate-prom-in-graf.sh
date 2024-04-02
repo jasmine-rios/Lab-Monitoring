@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# WORKING
+
 # Set Grafana API URL and credentials
 GRAFANA_URL="http://localhost:3000/api/datasources"
 GRAFANA_USER="admin"

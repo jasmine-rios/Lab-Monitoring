@@ -1,0 +1,30 @@
+#cloud-config
+package_upgrade: true
+packages:
+runcmd:
+  - sudo wget -O node-exporter.tar.gz https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz
+  - sudo tar -xvzf node-exporter.tar.gz -C /usr/local/
+  - sudo firewall-cmd --zone=public --add-port=9090/tcp --permanent
+  - sudo firewall-cmd --reload
+  - cd /usr/local/node-exporter
+  - sudo tee /etc/systemd/system/node-exporter.service <<EOF
+    [Unit]
+    Description=Prometheus Node Exporter
+    Wants=network-online.target
+    After=network-online.target
+
+    [Service]
+    Type=simple
+    ExecStart=/usr/local/node-exporter
+    Restart=always
+
+    [Install]
+    WantedBy=multi-user.target
+   EOF
+  - sudo systemctl enable node-exporter
+  - sudo systemctl start node-exporter
+  - if systemctl is-active --quiet node-exporter; then
+      logger -t cloud-init "Node exporter successfully installed and started.";
+    else
+      logger -t cloud-init "Node-exporter setup encountered an issue. Check node-exporter service status using 'sudo systemctl status node-exporter'.";
+    fi

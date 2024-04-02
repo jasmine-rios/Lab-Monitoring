@@ -21,13 +21,19 @@
         "networkSecurityGroupName": {
             "type": "string"
         },
-        "networkSecurityGroupNameHosts": {
+        "networkSecurityGroupNameHost1": {
+            "type": "string"
+        },
+        "networkSecurityGroupNameHost2": {
             "type": "string"
         },
         "networkSecurityGroupRules": {
             "type": "array"
         },
-        "networkSecurityGroupRulesHosts": {
+        "networkSecurityGroupRulesHost1": {
+            "type": "array"
+        },
+        "networkSecurityGroupRulesHost2": {
             "type": "array"
         },
         "publicIpAddressName": {
@@ -162,7 +168,7 @@
         "apiVersion": "2022-11-01",
         "location": "[parameters('location')]",
         "dependsOn": [
-            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHosts'))]",
+            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHost1'))]",
             "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressNameHost1'))]",
             "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
         ],
@@ -182,7 +188,7 @@
                 }
             ],
             "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameHosts'))]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameHost1'))]"
             }
         },
         "tags": {
@@ -196,7 +202,7 @@
         "apiVersion": "2022-11-01",
         "location": "[parameters('location')]",
         "dependsOn": [
-            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHosts'))]",
+            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHost2'))]",
             "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressNameHost2'))]",
             "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
         ],
@@ -216,7 +222,7 @@
                 }
             ],
             "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameHosts'))]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameHost2'))]"
             }
         },
         "tags": {
@@ -238,12 +244,25 @@
         }
     },
     {
-        "name": "[parameters('networkSecurityGroupNameHosts')]",
+        "name": "[parameters('networkSecurityGroupNameHost1')]",
         "type": "Microsoft.Network/networkSecurityGroups",
         "apiVersion": "2019-02-01",
         "location": "[parameters('location')]",
         "properties": {
-            "securityRules": "[parameters('networkSecurityGroupRulesHosts')]"
+            "securityRules": "[parameters('networkSecurityGroupRulesHost1')]"
+        },
+        "tags": {
+            "Template by": "Jasmine Rios",
+            "Project": "Grafana"
+        }
+    },
+    {
+        "name": "[parameters('networkSecurityGroupNameHost2')]",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "apiVersion": "2019-02-01",
+        "location": "[parameters('location')]",
+        "properties": {
+            "securityRules": "[parameters('networkSecurityGroupRulesHost2')]"
         },
         "tags": {
             "Template by": "Jasmine Rios",
@@ -346,7 +365,7 @@
     "osProfile": {
         "computerName": "[parameters('virtualMachineName')]",
         "adminUsername": "[parameters('adminUsername')]",
-        "customData": "base64('#cloud-config\\npackage_upgrade: true\\npackages:\\n  - grafana-enterprise # Install Grafana package\\n\\nruncmd:\\n  - if systemctl is-active --quiet grafana-server; then echo \\\"Grafana is already installed and running.\\\"; echo \\\"To access the Grafana UI, use the following URL in a supported browser:\\\"; echo \\\"http://<PublicIp>:3000\\\"; echo \\\"Use admin as the username and password, then reset the password\\\"; else sudo yum install -y https://dl.grafana.com/enterprise/release/grafana-enterprise-10.3.3-1.x86_64.rpm # Latest package, change if not latest; sudo systemctl enable grafana-server; sudo systemctl daemon-reload; sudo firewall-cmd --zone=public --add-port=3000/tcp --permanent; sudo sed -i 's/;protocol = http/protocol = http/' /etc/grafana/grafana.ini; sudo sed -i 's/;http_port = 3000/http_port = 3000/' /etc/grafana/grafana.ini; sudo systemctl start grafana-server; sudo systemctl status grafana-server; fi')",
+        "customData": "base64(#cloud-config\npackage_upgrade: true\npackages:\n  - grafana-enterprise # Install Grafana package\n\nruncmd:\n  - if systemctl is-active --quiet grafana-server; then\n      logger -t cloud-init \"Grafana is already installed and started.\";\n    else\n      sudo wget -O grafana.tar.gz https://dl.grafana.com/enterprise/release/grafana-enterprise-10.3.3-1.x86_64.rpm # Latest package, change if not latest;\n      sudo tar -xvzf grafana.tar.gz -C /usr/local/;\n      sudo systemctl enable grafana-server;\n      sudo systemctl daemon-reload;\n      sudo firewall-cmd --zone=public --add-port=3000/tcp --permanent;\n      sudo sed -i 's/;protocol = http/protocol = http/' /etc/grafana/grafana.ini;\n      sudo sed -i 's/;http_port = 3000/http_port = 3000/' /etc/grafana/grafana.ini;\n      sudo tee /etc/systemd/system/grafana-server.service <<EOF\n      [Unit]\n      Description=Grafana\n      Wants=network-online.target\n      After=network-online.target\n\n      [Service]\n      Type=simple\n      ExecStart=/usr/local/grafana\n      Restart=always\n\n      [Install]\n      WantedBy=multi-user.target\n      EOF\n      sudo systemctl start grafana-server;\n      if systemctl is-active --quiet grafana-server; then\n          logger -t cloud-init \"Grafana successfully installed and started.\";\n      else\n          logger -t cloud-init \"Grafana setup encountered an issue. Check Grafana service status using 'sudo systemctl status grafana-server'.\";\n      fi;\n  - sudo wget -O prometheus.tar.gz https://github.com/prometheus/prometheus/releases/download/v2.51.1/prometheus-2.51.1.linux-amd64.tar.gz;\n  - sudo tar -xvf prometheus.tar.gz -C /usr/local/;\n  - cd \"/usr/local/bin/prometheus.tar.gz\";\n  - sudo chmod +x prometheus;\n  - sudo mkdir -p /etc/prometheus/data;\n  - sudo mv prometheus.yml /etc/prometheus/;\n  - sudo tee /etc/systemd/system/prometheus.service <<EOF\n    [Unit]\n    Description=Prometheus Monitoring\n    Wants=network-online.target\n    After=network-online.target\n\n    [Service]\n    Type=simple\n    ExecStart=/usr/local/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/etc/prometheus/data\n    Restart=always\n\n    [Install]\n    WantedBy=multi-user.target\n   EOF;\n  - sudo systemctl daemon-reload;\n  - sudo systemctl enable prometheus;\n  - sudo systemctl start prometheus;\n  - if systemctl is-active --quiet prometheus; then\n      logger -t cloud-init \"Prometheus successfully installed and started.\";\n    else\n      logger -t cloud-init \"Prometheus setup encountered an issue. Check Prometheus service status using 'sudo systemctl status prometheus'.\";\n    fi;\n  - sudo wget -O pushgateway.tar.gz https://github.com/prometheus/pushgateway/releases/download/v1.7.0/pushgateway-1.7.0.linux-amd64.tar.gz;\n  - sudo tar -xvf pushgateway.tar.gz -C /usr/local/;\n  - sudo tee /etc/systemd/system/pushgateway.service <<EOF\n    [Unit]\n    Description=Prometheus Push Gateway\n    Wants=network-online.target\n    After=network-online.target\n\n    [Service]\n    Type=simple\n    ExecStart=/usr/local/pushgateway\n    Restart=always\n\n    [Install]\n    WantedBy=multi-user.target\n    EOF;\n  - sudo systemctl daemon-reload;\n  - sudo systemctl enable pushgateway;\n  - sudo systemctl start pushgateway;\n  - PROMETHEUS_CONFIG_FILE=\"/etc/prometheus/prometheus.yml\";\n  - cat >> \"$PROMETHEUS_CONFIG_FILE\" <<EOF\n    scrape_configs:\n      - job_name: 'prometheus'\n        static_configs:\n          - targets:\n            - 'localhost:9090' # Prometheus running on the same server\n      - job_name: 'pushgateway'\n        static_configs:\n          - targets:\n            - 'localhost:9091' # Push Gateway running on the same server\n    EOF;\n  - echo \"You must add the IPs to the prometheus.yml file and remember not to use tab but use space to ensure the yaml will work\";\n  - echo \"If using traditonal prometheus with a node exporter on systems, also called the pull method, add the IPs you want to monitor after localhost on the prometheus job. Follow the IPs with a colon and 9090 and a comment on what the server is. You must have the node exporter on the target systems.\";\n  - echo \"If using the pushgatway method for temporary jobs or Windows VMs, add the IPs you want to monitor after localhost on the gateway job. Follow the IPs with a colon and 9091 and a comment on what the server is. You must have 9091 enabled on the target systems.\";\n  - echo \"After completion of adding the IPs and saving the prometheus.yml file, start Prometheus with 'sudo systemctl restart prometheus'.\";\n)",
       "linuxConfiguration": {
         "disablePasswordAuthentication": true,
         "ssh": {
@@ -397,9 +416,9 @@
         }
       },
       "imageReference": {
-        "publisher": "canonical",
-        "offer": "",
-        "sku": "92_gen2",
+        "publisher": "Canonical",
+        "offer": "UbuntuServer",
+        "sku": "18.04-LTS",
         "version": "latest"
       }
     },
@@ -413,7 +432,18 @@
     "osProfile": {
         "computerName": "[parameters('virtualMachineHost1Name')]",
         "adminUsername": "[parameters('adminUsername')]",
-        "customData": null
+        "customData": "base64(#cloud-config\npackage_upgrade: true\npackages:\n  - wget\n  - tar\nruncmd:\n  - sudo apt update\n  - sudo apt install -y wget tar\n  - sudo wget -O node-exporter.tar.gz https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz\n  - sudo tar -xvzf node-exporter.tar.gz -C /usr/local/\n  - sudo ufw allow 9090/tcp\n  - cd /usr/local/node_exporter-1.7.0.linux-amd64\n  - sudo tee /etc/systemd/system/node-exporter.service <<EOF\n    [Unit]\n    Description=Prometheus Node Exporter\n    Wants=network-online.target\n    After=network-online.target\n\n    [Service]\n    Type=simple\n    ExecStart=/usr/local/node_exporter-1.7.0.linux-amd64/node_exporter\n    Restart=always\n\n    [Install]\n    WantedBy=multi-user.target\n   EOF\n  - sudo systemctl daemon-reload\n  - sudo systemctl enable node-exporter\n  - sudo systemctl start node-exporter\n  - if systemctl is-active --quiet node-exporter; then\n      logger -t cloud-init 'Node exporter successfully installed and started.';\n    else\n      logger -t cloud-init 'Node-exporter setup encountered an issue. Check node-exporter service status using ''sudo systemctl status node-exporter''.';\n    fi\n)",
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+                "publicKeys": [
+                {
+                    "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                    "keyData": "[parameters('sshPublicKey')]"
+                }
+                ]
+            }
+        }
     }
   }
 },
@@ -448,12 +478,12 @@
           "storageAccountType": "[parameters('osDiskType')]"
         }
       },
-      "imageReference": {
-        "publisher": "Microsoft",
-        "offer": "Windows",
-        "sku": "92_gen2",
+    "imageReference": {
+        "publisher": "MicrosoftWindowsServer",
+        "offer": "WindowsServer",
+        "sku": "2019-Datacenter",
         "version": "latest"
-      }
+    }
     },
     "networkProfile": {
       "networkInterfaces": [
@@ -465,7 +495,17 @@
     "osProfile": {
         "computerName": "[parameters('virtualMachineHost2Name')]",
         "adminUsername": "[parameters('adminUsername')]",
-        "customData": null
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+                "publicKeys": [
+                {
+                    "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                    "keyData": "[parameters('sshPublicKey')]"
+                }
+                ]
+            }
+        }
     }
   }
 }
