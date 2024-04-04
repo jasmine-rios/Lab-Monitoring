@@ -1,0 +1,101 @@
+#cloud-config
+package_upgrade: true
+packages:
+runcmd:
+  - sudo wget -O grafana.tar.gz https://dl.grafana.com/enterprise/release/grafana-enterprise-10.3.3-1.x86_64.rpm
+  - sudo tar -xvzf grafana.tar.gz -C /usr/local/
+  - sudo systemctl enable grafana-server
+  - sudo systemctl daemon-reload
+  - sudo firewall-cmd --zone=public --add-port=3000/tcp --add-port=9090/tcp --add-port=9091/tcp --permanent
+  - sudo firewall-cmd --reload
+  - sudo sed -i 's/;protocol = http/protocol = http/' /etc/grafana/grafana.ini
+  - sudo sed -i 's/;http_port = 3000/http_port = 3000/' /etc/grafana/grafana.ini
+  - sudo tee /etc/systemd/system/grafana-server.service <<EOF
+    [Unit]
+    Description=Grafana
+    Wants=network-online.target
+    After=network-online.target
+
+    [Service]
+    Type=simple
+    ExecStart=/usr/local/grafana
+    Restart=always
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+  - sudo systemctl start grafana-server
+  - if systemctl is-active --quiet grafana-server; then
+      logger -t cloud-init "Grafana successfully installed and started.";
+    else
+      logger -t cloud-init "Grafana setup encountered an issue. Check Grafana service status using 'sudo systemctl status grafana-server'.";
+    fi
+  - sudo wget -O prometheus.tar.gz https://github.com/prometheus/prometheus/releases/download/v2.51.1/prometheus-2.51.1.linux-amd64.tar.gz
+  - sudo tar -xvf prometheus.tar.gz -C /usr/local/
+  - cd "/usr/local/bin/prometheus.tar.gz"
+  - sudo chmod +x prometheus
+  - sudo mkdir -p /etc/prometheus/data
+  - sudo mv prometheus.yml /etc/prometheus/
+  - sudo tee /etc/systemd/system/prometheus.service <<EOF
+    [Unit]
+    Description=Prometheus Monitoring
+    Wants=network-online.target
+    After=network-online.target
+
+    [Service]
+    Type=simple
+    ExecStart=/usr/local/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/etc/prometheus/data
+    Restart=always
+
+    [Install]
+    WantedBy=multi-user.target
+   EOF
+  - sudo systemctl daemon-reload
+  - sudo systemctl enable prometheus
+  - sudo systemctl start prometheus
+  - if systemctl is-active --quiet prometheus; then
+      logger -t cloud-init "Prometheus successfully installed and started.";
+    else
+      logger -t cloud-init "Prometheus setup encountered an issue. Check Prometheus service status using 'sudo systemctl status prometheus'.";
+    fi
+  
+  - sudo wget -O pushgateway.tar.gz https://github.com/prometheus/pushgateway/releases/download/v1.7.0/pushgateway-1.7.0.linux-amd64.tar.gz
+  - sudo tar -xvf pushgateway.tar.gz -C /usr/local/
+  - sudo tee /etc/systemd/system/pushgateway.service <<EOF
+    [Unit]
+    Description=Prometheus Push Gateway
+    Wants=network-online.target
+    After=network-online.target
+
+    [Service]
+    Type=simple
+    ExecStart=/usr/local/pushgateway
+    Restart=always
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+  - sudo systemctl daemon-reload
+  - sudo systemctl enable pushgateway
+  - sudo systemctl start pushgateway
+  - PROMETHEUS_CONFIG_FILE="/etc/prometheus/prometheus.yml"
+  - cat >> "$PROMETHEUS_CONFIG_FILE" <<EOF
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets:
+        - 'localhost:9090' # Prometheus running on the same server
+  - job_name: 'pushgateway'
+    static_configs:
+      - targets:
+        - 'localhost:9091' # Push Gateway running on the same server
+EOF
+  - echo "You must add the IPs to the prometheus.yml file and remember not to use tab but use space to ensure the yaml will work"
+  - echo "If using traditonal prometheus with a node exporter on systems, also called the pull method, add the IPs you want to monitor after localhost on the prometheus job. Follow the IPs with a colon and 9090 and a comment on what the server is. You must have the node exporter on the target systems."
+  - echo "If using the pushgatway method for temporary jobs or Windows VMs, add the IPs you want to monitor after localhost on the gateway job. Follow the IPs with a colon and 9091 and a comment on what the server is. You must have 9091 enabled on the target systems."
+  - echo "After completion of adding the IPs and saving the prometheus.yml file, start Prometheus with 'sudo systemctl restart prometheus'."
+  
+  - sudo wget -O alertmanager.tar.gz https://github.com/prometheus/alertmanager/releases/download/v0.27.0/alertmanager-0.27.0.linux-amd64.tar.gz
+  - sudo tar -xvzf alertmanager.tar.gz -C /usr/local/
+  - sudo systemctl enable grafana-server
+  - sudo systemctl daemon-reload
