@@ -18,10 +18,10 @@
 			"value": "grafana-NSG"
 		},
 		"networkSecurityGroupNameHost1": {
-            "value": "grafana-host2-NSG"
+            "value": "grafana-host1-NSG"
         },
 		"networkSecurityGroupNameHost2": {
-            "value": "string"
+            "value": "grafana-host2-NSG"
         },
 		"networkSecurityGroupRules": {
 			"value": [
@@ -171,10 +171,10 @@
 			"value": "Standard"
 		},
 		"publicIpAddressNameHost1": {
-			"value": "grafana-publicIP"
+			"value": "grafana-publicIP1"
 		},
 		"publicIpAddressNameHost2": {
-			"value": "grafana-publicIP"
+			"value": "grafana-publicIP2"
 		},
 		"virtualMachineName": {
 			"value": "grafana-RHEL"
@@ -183,7 +183,7 @@
             "value": "grafana-host1-ubuntu"
         },
         "virtualMachineHost2Name": {
-            "value": "grafana-host1-win"
+            "value": "grafana-host2-win"
         },
 		"osDiskType": {
 			"value": "Premium_LRS"
