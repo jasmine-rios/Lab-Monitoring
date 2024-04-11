@@ -493,16 +493,8 @@
     "osProfile": {
         "computerName": "[parameters('virtualMachineHost2Name')]",
         "adminUsername": "[parameters('adminUsername')]",
-        "linuxConfiguration": {
-            "disablePasswordAuthentication": true,
-            "ssh": {
-                "publicKeys": [
-                {
-                    "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-                    "keyData": "[parameters('sshPublicKey')]"
-                }
-                ]
-            }
+        "windowsConfiguration": {
+            "disablePasswordAuthentication": true
         }
     }
   }
