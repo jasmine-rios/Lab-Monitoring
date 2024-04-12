@@ -5,6 +5,9 @@
 		"location": {
 			"value":"eastus"
 		},
+		"networkInterfaceNameBastion": {
+			"value": "grafana-Bastion-NI"
+		},
 		"networkInterfaceName": {
 			"value": "grafana-NI"
 		},
@@ -23,6 +26,24 @@
 		"networkSecurityGroupNameHost2": {
             "value": "grafana-host2-NSG"
         },
+		"networkSecurityGroupRulesBastion": {
+			"value": [
+				{
+					"name": "Bastion",
+					"properties": {
+						"priority": 300,
+						"protocol": "TCP",
+						"access": "Allow",
+						"direction": "Inbound",
+						"sourceAddressPrefix": "*",
+						"sourcePortRange": "*",
+						"destinationAddressPrefix": "*",
+						"destinationPortRange": "22",
+						"description": "Allow inbound traffic from VMs to Bastion."
+					}
+				}
+			]
+		},
 		"networkSecurityGroupRules": {
 			"value": [
 				{
@@ -36,7 +57,7 @@
 						"sourcePortRange": "*",
 						"destinationAddressPrefix": "*",
 						"destinationPortRange": "22",
-						"description": "Allow inbound SSH traffic from anywhere."
+						"description": "Allow inbound SSH traffic from Bastion."
 					}
 				},
 				{
@@ -161,20 +182,11 @@
 			}
 		]
 		},
-		"publicIpAddressName": {
-			"value": "grafana-publicIP"
-		},
-		"publicIpAddressType": {
-			"value": "Static"
+		"publicIpAddressNameBastion": {
+			"value": "grafana-publicIP-bastion"
 		},
 		"publicIpAddressSku": {
 			"value": "Standard"
-		},
-		"publicIpAddressNameHost1": {
-			"value": "grafana-publicIP1"
-		},
-		"publicIpAddressNameHost2": {
-			"value": "grafana-publicIP2"
 		},
 		"virtualMachineName": {
 			"value": "grafana-RHEL"
@@ -188,6 +200,9 @@
 		"osDiskType": {
 			"value": "Premium_LRS"
 		},
+		"bastionName": {
+			"value": "Grafana-bastion"
+		},
 		"virtualMachineSize": {
 			"value": "Standard_B2s"
 		},
@@ -197,6 +212,9 @@
 		"adminUsername": {
 			"value": "azureuser"
 		},
+		"adminPassword": {
+			"value": ""
+		},
 		"securityType": {
 			"value": "TrustedLaunch"
 		},
@@ -205,9 +223,6 @@
 		},
 		"vTPM": {
 			"value": true
-		},
-		"sshPublicKey": {
-			"value": "string"
 		},
 		"virtualNetworkName": {
 			"value": "grafana-VNet"
