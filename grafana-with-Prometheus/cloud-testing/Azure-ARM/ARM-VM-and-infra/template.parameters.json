@@ -169,7 +169,7 @@
 		]
 		},
 		"publicIpAddressNameBastion": {
-			"value": "grafana-publicIP-bastion"
+			"value": "grafana-publicIp-bastion"
 		},
 		"publicIpAddressSku": {
 			"value": "Standard"

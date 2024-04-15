@@ -3,11 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "type": "string",
-            "allowedValues": [
-                "AzureGov.USVirginia",
-                "eastus"
-            ]
+            "type": "string"
         },
         "networkInterfaceName": {
             "type": "string"
@@ -283,7 +279,7 @@
     {
         "name": "[parameters('publicIpAddressNameBastion')]",
         "type": "Microsoft.Network/publicIpAddresses",
-        "apiVersion": "2017-06-01",
+        "apiVersion": "2020-08-01",
         "location": "[parameters('location')]",
         "properties": {
             "publicIPAllocationMethod": "Static",
@@ -303,15 +299,20 @@
     "apiVersion": "2019-04-01",
     "location": "[parameters('location')]",
     "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddress/', parameters('publicIpAddressNameBastion'))]"
+        "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressNameBastion'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet3'))]"
     ],
     "properties": {
         "ipConfigurations": [
             {
                 "name": "IpConfiguration",
                 "properties": {
-                    "subnet": "[parameters('Subnet3')]",
-                    "PublicIPAddress": "[parameters('publicIpAddressNameBastion')]"
+                    "subnet": {
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet3'))]"
+                    },
+                    "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressNameBastion'))]"
+                    }
                 }
             }
         ]
