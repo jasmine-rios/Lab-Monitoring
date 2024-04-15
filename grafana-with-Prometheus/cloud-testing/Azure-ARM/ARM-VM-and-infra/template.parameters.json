@@ -5,9 +5,6 @@
 		"location": {
 			"value":"eastus"
 		},
-		"networkInterfaceNameBastion": {
-			"value": "grafana-Bastion-NI"
-		},
 		"networkInterfaceName": {
 			"value": "grafana-NI"
 		},
@@ -17,6 +14,9 @@
         "networkInterfaceNameHost2": {
             "value": "grafana-host2-NI"
         },
+		"networkSecurityGroupNameBastion": {
+			"value": "grafana-bastion-NSG"
+		},
 		"networkSecurityGroupName": {
 			"value": "grafana-NSG"
 		},
@@ -29,7 +29,7 @@
 		"networkSecurityGroupRulesBastion": {
 			"value": [
 				{
-					"name": "Bastion",
+					"name": "HTTPS",
 					"properties": {
 						"priority": 300,
 						"protocol": "TCP",
@@ -38,8 +38,8 @@
 						"sourceAddressPrefix": "*",
 						"sourcePortRange": "*",
 						"destinationAddressPrefix": "*",
-						"destinationPortRange": "22",
-						"description": "Allow inbound traffic from VMs to Bastion."
+						"destinationPortRange": "443",
+						"description": "Allow inbound traffic from internet to Bastion."
 					}
 				}
 			]
@@ -54,10 +54,10 @@
 						"access": "Allow",
 						"direction": "Inbound",
 						"sourceAddressPrefix": "*",
-						"sourcePortRange": "*",
+						"sourcePortRange": "AzureBastionSubnet",
 						"destinationAddressPrefix": "*",
 						"destinationPortRange": "22",
-						"description": "Allow inbound SSH traffic from Bastion."
+						"description": "Allow inbound SSH traffic from bastion host."
 					}
 				},
 				{
@@ -67,25 +67,11 @@
 						"protocol": "TCP",
 						"access": "Allow",
 						"direction": "Inbound",
-						"sourceAddressPrefix": "*",
+						"sourceAddressPrefix": "VirtualNetwork",
 						"sourcePortRange": "*",
 						"destinationAddressPrefix": "*",
 						"destinationPortRange": "3000",
 						"description": "Allow inbound default Grafana port"
-					}
-				},
-				{
-					"name": "HTTP",
-					"properties": {
-						"priority": 320,
-						"protocol": "TCP",
-						"access": "Allow",
-						"direction": "Inbound",
-						"sourceAddressPrefix": "*",
-						"sourcePortRange": "*",
-						"destinationAddressPrefix": "*",
-						"destinationPortRange": "80",
-						"description": "Allow Any HTTP Inbound to serve webpages for Grafana and Prometheus"
 					}
 				},
 				{
@@ -95,7 +81,7 @@
 						"protocol": "TCP",
 						"access": "Allow",
 						"direction": "Inbound",
-						"sourceAddressPrefix": "*",
+						"sourceAddressPrefix": "VirtualNetwork",
 						"sourcePortRange": "*",
 						"destinationAddressPrefix": "*",
 						"destinationPortRange": "9090",
@@ -109,7 +95,7 @@
 						"protocol": "TCP",
 						"access": "Allow",
 						"direction": "Inbound",
-						"sourceAddressPrefix": "*",
+						"sourceAddressPrefix": "VirtualNetwork",
 						"sourcePortRange": "*",
 						"destinationAddressPrefix": "*",
 						"destinationPortRange": "9091",
@@ -129,9 +115,9 @@
 						"direction": "Inbound",
 						"sourceAddressPrefix": "*",
 						"sourcePortRange": "*",
-						"destinationAddressPrefix": "*",
+						"destinationAddressPrefix": "publicIpAddressNameBastion",
 						"destinationPortRange": "22",
-						"description": "Allow inbound SSH traffic from anywhere."
+						"description": "Allow inbound SSH traffic from bastion host."
 					}
 				},
 				{
@@ -141,7 +127,7 @@
 					"protocol": "TCP",
 					"access": "Allow",
 					"direction": "Inbound",
-					"sourceAddressPrefix": "*",
+					"sourceAddressPrefix": "VirtualNetwork",
 					"sourcePortRange": "*",
 					"destinationAddressPrefix": "*",
 					"destinationPortRange": "9090",
@@ -161,9 +147,9 @@
 						"direction": "Inbound",
 						"sourceAddressPrefix": "*",
 						"sourcePortRange": "*",
-						"destinationAddressPrefix": "*",
+						"destinationAddressPrefix": "publicIpAddressNameBastion",
 						"destinationPortRange": "3389",
-						"description": "Allow inbound RDP traffic from anywhere."
+						"description": "Allow inbound RDP traffic from bastion host."
 					}
 				},
 				{
@@ -173,7 +159,7 @@
 					"protocol": "TCP",
 					"access": "Allow",
 					"direction": "Inbound",
-					"sourceAddressPrefix": "*",
+					"sourceAddressPrefix": "VirtualNetwork",
 					"sourcePortRange": "*",
 					"destinationAddressPrefix": "*",
 					"destinationPortRange": "9091",
@@ -187,6 +173,9 @@
 		},
 		"publicIpAddressSku": {
 			"value": "Standard"
+		},
+		"virtualMachineNameBastion": {
+			"value": "grafana-Bastion"
 		},
 		"virtualMachineName": {
 			"value": "grafana-RHEL"
@@ -232,6 +221,9 @@
         },
         "Subnet2": {
             "value": "grafana-subnet2"
+        },
+		"Subnet3": {
+            "value": "AzureBastionSubnet"
         }
 	}
 }
