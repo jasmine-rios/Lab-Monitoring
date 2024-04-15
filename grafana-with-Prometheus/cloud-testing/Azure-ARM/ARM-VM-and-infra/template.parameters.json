@@ -189,9 +189,6 @@
 		"osDiskType": {
 			"value": "Premium_LRS"
 		},
-		"bastionName": {
-			"value": "Grafana-bastion"
-		},
 		"virtualMachineSize": {
 			"value": "Standard_B2s"
 		},

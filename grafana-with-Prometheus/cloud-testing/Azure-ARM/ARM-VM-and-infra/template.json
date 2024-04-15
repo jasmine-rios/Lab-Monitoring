@@ -488,7 +488,7 @@
     "outputs": {
         "SSH Instructions": {
             "type": "string",
-            "value": "[concat('To SSH into the instances with the bastion, use the following command:\n')]"
+            "value": "[concat('On the Azure Portal, go to the Virtual Machine you want to connect to. ', '\n', 'On the Overview page of the virtual Machine, click Connect then click Bastion. ', '\n', 'Configure bastion if required and log in with the username, ', parameters('adminUsername'), ', and password, ', parameters('adminPassword'), '. ', '\n', 'A new browser will open with a session through a web browser.')]"
 
         }
     }
