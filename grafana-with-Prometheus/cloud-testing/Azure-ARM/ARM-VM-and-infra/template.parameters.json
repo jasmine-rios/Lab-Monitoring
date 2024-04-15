@@ -219,7 +219,7 @@
         "Subnet2": {
             "value": "grafana-subnet2"
         },
-		"Subnet3": {
+		"AzureBastionSubnet": {
             "value": "AzureBastionSubnet"
         }
 	}

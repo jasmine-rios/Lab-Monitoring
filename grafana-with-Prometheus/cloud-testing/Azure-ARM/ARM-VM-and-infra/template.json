@@ -89,7 +89,7 @@
         "Subnet2": {
             "type": "string"
         },
-        "Subnet3": {
+        "AzureBastionSubnet": {
             "type": "string"
         }
     },
@@ -99,7 +99,7 @@
     {
         "name": "[parameters('virtualNetworkName')]",
         "type": "Microsoft.Network/virtualNetworks",
-        "apiVersion": "2017-06-01",
+        "apiVersion": "2020-06-01",
         "location": "[parameters('location')]",
         "properties": {
             "addressSpace": {
@@ -121,7 +121,7 @@
                     }
                 },
                 {
-                    "name": "[parameters('Subnet3')]",
+                    "name": "AzureBastionSubnet",
                     "properties": {
                         "addressPrefix": "10.0.128.0/24"
                     }
@@ -296,11 +296,11 @@
     {
     "name": "[parameters('virtualMachineNameBastion')]",
     "type": "Microsoft.Network/bastionHosts",
-    "apiVersion": "2019-04-01",
+    "apiVersion": "2020-06-01",
     "location": "[parameters('location')]",
     "dependsOn": [
         "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressNameBastion'))]",
-        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet3'))]"
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), 'AzureBastionSubnet')]"
     ],
     "properties": {
         "ipConfigurations": [
@@ -308,7 +308,7 @@
                 "name": "IpConfiguration",
                 "properties": {
                     "subnet": {
-                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet3'))]"
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), 'AzureBastionSubnet')]"
                     },
                     "publicIPAddress": {
                         "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressNameBastion'))]"
