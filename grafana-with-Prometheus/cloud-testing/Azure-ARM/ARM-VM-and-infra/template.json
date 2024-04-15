@@ -88,9 +88,6 @@
         },
         "Subnet2": {
             "type": "string"
-        },
-        "AzureBastionSubnet": {
-            "type": "string"
         }
     },
     "functions": [],

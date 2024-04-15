@@ -3,7 +3,7 @@
 	"contentVersion": "1.0.0.0",
 	"parameters": {
 		"location": {
-			"value":"eastus"
+			"value":"usgovvirginia"
 		},
 		"networkInterfaceName": {
 			"value": "grafana-NI"
@@ -218,9 +218,6 @@
         },
         "Subnet2": {
             "value": "grafana-subnet2"
-        },
-		"AzureBastionSubnet": {
-            "value": "AzureBastionSubnet"
         }
 	}
 }
