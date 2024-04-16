@@ -53,8 +53,8 @@
 						"protocol": "TCP",
 						"access": "Allow",
 						"direction": "Inbound",
-						"sourceAddressPrefix": "*",
-						"sourcePortRange": "AzureBastionSubnet",
+						"sourceAddressPrefix": "AzureBastionSubnet",
+						"sourcePortRange": "*",
 						"destinationAddressPrefix": "*",
 						"destinationPortRange": "22",
 						"description": "Allow inbound SSH traffic from bastion host."
@@ -113,9 +113,9 @@
 						"protocol": "TCP",
 						"access": "Allow",
 						"direction": "Inbound",
-						"sourceAddressPrefix": "*",
+						"sourceAddressPrefix": "AzureBastionSubnet",
 						"sourcePortRange": "*",
-						"destinationAddressPrefix": "publicIpAddressNameBastion",
+						"destinationAddressPrefix": "VirtualNetwork",
 						"destinationPortRange": "22",
 						"description": "Allow inbound SSH traffic from bastion host."
 					}
@@ -145,9 +145,9 @@
 						"protocol": "TCP",
 						"access": "Allow",
 						"direction": "Inbound",
-						"sourceAddressPrefix": "*",
+						"sourceAddressPrefix": "AzureBastionSubnet",
 						"sourcePortRange": "*",
-						"destinationAddressPrefix": "publicIpAddressNameBastion",
+						"destinationAddressPrefix": "VirtualNetwork",
 						"destinationPortRange": "3389",
 						"description": "Allow inbound RDP traffic from bastion host."
 					}
