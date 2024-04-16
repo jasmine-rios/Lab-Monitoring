@@ -136,30 +136,46 @@
                     "10.0.0.0/16"
                 ]
             },
-            "subnets": [
-                {
-                    "name": "[parameters('Subnet1')]",
-                    "properties": {
-                        "addressPrefix": "10.0.0.0/18"
-                    }
-                },
-                {
-                    "name": "[parameters('Subnet2')]",
-                    "properties": {
-                        "addressPrefix": "10.0.64.0/18"
-                    }
-                },
-                {
-                    "name": "[parameters('AzureBastionSubnet')]",
-                    "properties": {
-                        "addressPrefix": "10.0.128.0/24"
-                    }
-                }
-            ]
-        },
         "tags": {
             "Template by": "Jasmine Rios",
             "Project": "Grafana"
+        }
+    }
+    },
+    {
+        "type": "Microsoft.Network/virtualNetworks/subnets",
+        "apiVersion": "2020-06-01",
+        "name": "[concat(parameters('virtualNetworkName'), '/Subnet1')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
+        ],
+        "properties": {
+            "addressPrefix": "10.0.0.0/24"
+        }
+    },
+    {
+        "type": "Microsoft.Network/virtualNetworks/subnets",
+        "apiVersion": "2020-06-01",
+        "name": "[concat(parameters('virtualNetworkName'), '/Subnet2')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
+        ],
+        "properties": {
+            "addressPrefix": "10.0.1.0/24"
+        }
+    },
+    {
+        "type": "Microsoft.Network/virtualNetworks/subnets",
+        "apiVersion": "2020-06-01",
+        "name": "[concat(parameters('virtualNetworkName'), '/AzureBastionSubnet')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
+        ],
+        "properties": {
+            "addressPrefix": "10.0.2.0/24"
         }
     },
     {
@@ -328,7 +344,7 @@
     "apiVersion": "2020-06-01",
     "location": "[parameters('location')]",
     "dependsOn": [
-        "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressNameBastion'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), 'AzureBastionSubnet')]",
         "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('AzureBastionSubnet'))]"
     ],
     "properties": {
@@ -337,7 +353,7 @@
                 "name": "IpConfiguration",
                 "properties": {
                     "subnet": {
-                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('AzureBastionSubnet'))]"
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), 'AzureBastionSubnet')]"
                     },
                     "publicIPAddress": {
                         "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressNameBastion'))]"
