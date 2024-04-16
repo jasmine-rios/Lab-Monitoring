@@ -3,91 +3,123 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "usgovvirginia"
         },
         "networkInterfaceName": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "grafana-NI"
         },
         "networkInterfaceNameHost1": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "grafana-host1-NI"
         },
         "networkInterfaceNameHost2": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "grafana-host2-NI"
         },
         "networkSecurityGroupNameBastion":{
-            "type": "string"
+            "type": "string",
+            "defaultValue": "grafana-bastion-NSG"
         },
         "networkSecurityGroupName": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "grafana-NSG"
         },
         "networkSecurityGroupNameHost1": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "grafana-host1-NSG"
         },
         "networkSecurityGroupNameHost2": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "grafana-host2-NSG"
         },
         "networkSecurityGroupRulesBastion": {
-            "type": "array"
+            "type": "array",
+            "defaultValue": ""
         },
         "networkSecurityGroupRules": {
-            "type": "array"
+            "type": "array",
+            "defaultValue": ""
         },
         "networkSecurityGroupRulesHost1": {
-            "type": "array"
+            "type": "array",
+            "defaultValue": ""
         },
         "networkSecurityGroupRulesHost2": {
-            "type": "array"
+            "type": "array",
+            "defaultValue": ""
         },
         "publicIpAddressNameBastion": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": ""
         },
         "publicIpAddressSku": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "Standard"
         },
         "virtualMachineNameBastion": {
-			"type": "string"
+			"type": "string",
+            "defaultValue": "grafana-Bastion"
 		},
         "virtualMachineName": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "grafana-RHEL"
         },
         "virtualMachineHost1Name": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "grafana-host1-ubuntu"
         },
         "virtualMachineHost2Name": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "grafana-host2-win"
         },
         "osDiskType": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "Premium_LRS"
         },
         "virtualMachineSize": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "Standard_B2s"
         },
         "virtualMachineSizeHosts": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "Standard_DS1_v2"
         },
         "adminUsername": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "azureuser"
         },
         "adminPassword": {
 			"type": "securestring"
 		},
         "securityType": {
-			"type": "string"
+			"type": "string",
+            "defaultValue": "TrustedLaunch"
 		},
         "secureBoot": {
-            "type": "bool"
+            "type": "bool",
+            "defaultValue": true
         },
         "vTPM": {
-            "type": "bool"
+            "type": "bool",
+            "defaultValue": true
         },
         "virtualNetworkName": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "grafana-VNet"
         },
         "Subnet1": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "grafana-subnet1"
         },
         "Subnet2": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "grafana-subnet2"
+        },
+        "AzureBastionSubnet": {
+            "type": "string",
+            "defaultValue": "AzureBastionSubnet"
         }
     },
     "functions": [],
@@ -118,7 +150,7 @@
                     }
                 },
                 {
-                    "name": "AzureBastionSubnet",
+                    "name": "[parameters('AzureBastionSubnet')]",
                     "properties": {
                         "addressPrefix": "10.0.128.0/24"
                     }
@@ -297,7 +329,7 @@
     "location": "[parameters('location')]",
     "dependsOn": [
         "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressNameBastion'))]",
-        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), 'AzureBastionSubnet')]"
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('AzureBastionSubnet'))]"
     ],
     "properties": {
         "ipConfigurations": [
@@ -305,7 +337,7 @@
                 "name": "IpConfiguration",
                 "properties": {
                     "subnet": {
-                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), 'AzureBastionSubnet')]"
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('AzureBastionSubnet'))]"
                     },
                     "publicIPAddress": {
                         "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressNameBastion'))]"
