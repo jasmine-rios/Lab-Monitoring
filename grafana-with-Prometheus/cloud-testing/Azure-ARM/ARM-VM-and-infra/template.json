@@ -135,11 +135,7 @@
                 "addressPrefixes": [
                     "10.0.0.0/16"
                 ]
-            },
-        "tags": {
-            "Template by": "Jasmine Rios",
-            "Project": "Grafana"
-        }
+            }
     }
     },
     {
@@ -202,10 +198,6 @@
             "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
             }
-        },
-        "tags": {
-            "Template by": "Jasmine Rios",
-            "Project": "Grafana"
         }
     },
     {
@@ -232,10 +224,6 @@
             "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameHost1'))]"
             }
-        },
-        "tags": {
-            "Template by": "Jasmine Rios",
-            "Project": "Grafana"
         }
     },
         {
@@ -263,10 +251,6 @@
             "networkSecurityGroup": {
                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameHost2'))]"
             }
-        },
-        "tags": {
-            "Template by": "Jasmine Rios",
-            "Project": "Grafana"
         }
     },
     {
@@ -276,10 +260,6 @@
         "location": "[parameters('location')]",
         "properties": {
             "securityRules": "[parameters('networkSecurityGroupRules')]"
-        },
-        "tags": {
-            "Template by": "Jasmine Rios",
-            "Project": "Grafana"
         }
     },
     {
@@ -289,10 +269,6 @@
         "location": "[parameters('location')]",
         "properties": {
             "securityRules": "[parameters('networkSecurityGroupRulesBastion')]"
-        },
-        "tags": {
-            "Template by": "Jasmine Rios",
-            "Project": "Grafana"
         }
     },
     {
@@ -302,10 +278,6 @@
         "location": "[parameters('location')]",
         "properties": {
             "securityRules": "[parameters('networkSecurityGroupRulesHost1')]"
-        },
-        "tags": {
-            "Template by": "Jasmine Rios",
-            "Project": "Grafana"
         }
     },
     {
@@ -315,10 +287,6 @@
         "location": "[parameters('location')]",
         "properties": {
             "securityRules": "[parameters('networkSecurityGroupRulesHost2')]"
-        },
-        "tags": {
-            "Template by": "Jasmine Rios",
-            "Project": "Grafana"
         }
     },
     {
@@ -332,10 +300,6 @@
         },
         "sku": {
             "name": "[parameters('publicIpAddressSku')]"
-        },
-        "tags": {
-            "Template by": "Jasmine Rios",
-            "Project": "Grafana"
         }
     },
     {
@@ -416,10 +380,6 @@
             "disablePasswordAuthentication": true
         }
         }
-    },
-    "tags": {
-        "Template by": "Jasmine Rios",
-        "Project": "Grafana"
     }
     },
 {
