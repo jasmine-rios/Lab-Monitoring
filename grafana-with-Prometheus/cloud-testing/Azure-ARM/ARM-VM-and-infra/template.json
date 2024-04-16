@@ -189,7 +189,7 @@
                     "name": "ipconfig1",
                     "properties": {
                         "subnet": {
-                            "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/', parameters('Subnet1'))]"
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1'))]"
                         },
                         "privateIPAllocationMethod": "Dynamic"
                     }
@@ -215,7 +215,7 @@
                     "name": "ipconfig1",
                     "properties": {
                         "subnet": {
-                            "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/', parameters('Subnet1'))]"
+                             "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1'))]"
                         },
                         "privateIPAllocationMethod": "Dynamic"
                     }
@@ -241,7 +241,7 @@
                     "name": "ipconfig1",
                     "properties": {
                         "subnet": {
-                            "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/', parameters('Subnet2'))]"
+                             "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet2'))]"
                         },
                         "privateIPAllocationMethod": "Dynamic"
                         
