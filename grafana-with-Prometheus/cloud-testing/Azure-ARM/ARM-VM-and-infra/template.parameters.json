@@ -55,7 +55,7 @@
 						"direction": "Inbound",
 						"sourceAddressPrefix": "AzureBastionSubnet",
 						"sourcePortRange": "*",
-						"destinationAddressPrefix": "*",
+						"destinationAddressPrefix": "VirtualNetwork",
 						"destinationPortRange": "22",
 						"description": "Allow inbound SSH traffic from bastion host."
 					}
