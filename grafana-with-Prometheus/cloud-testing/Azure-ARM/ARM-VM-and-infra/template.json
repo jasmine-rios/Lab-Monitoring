@@ -180,9 +180,10 @@
         "apiVersion": "2017-06-01",
         "location": "[parameters('location')]",
         "dependsOn": [
-            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
-            "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
+            "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
+            "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1'))]"
         ],
+
         "properties": {
             "ipConfigurations": [
                 {
@@ -206,9 +207,10 @@
         "apiVersion": "2017-06-01",
         "location": "[parameters('location')]",
         "dependsOn": [
-            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHost1'))]",
-            "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
+            "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameHost1'))]",
+            "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1'))]"
         ],
+
         "properties": {
             "ipConfigurations": [
                 {
@@ -232,9 +234,10 @@
         "apiVersion": "2017-06-01",
         "location": "[parameters('location')]",
         "dependsOn": [
-            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHost2'))]",
-            "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
+            "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameHost2'))]",
+            "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet2'))]"
         ],
+
         "properties": {
             "ipConfigurations": [
                 {
