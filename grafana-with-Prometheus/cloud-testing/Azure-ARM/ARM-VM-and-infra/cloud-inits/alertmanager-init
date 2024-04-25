@@ -1,0 +1,31 @@
+r#cloud-config
+package_upgrade: true
+packages:
+
+runcmd:
+  - sudo wget -O alertmanager.tar.gz https://github.com/prometheus/alertmanager/releases/download/v0.27.0/alertmanager-0.27.0.linux-amd64.tar.gz
+  - sudo tar -xvzf alertmanager.tar.gz -C /usr/local/
+  - cd /usr/local/alertmanager
+  - sudo tee /etc/systemd/system/alertmanager.service <<EOF
+    [Unit]
+    Description=Alertmanager for Prometheus
+    Wants=network-online.target
+    After=network-online.target
+
+    [Service]
+    Type=simple
+    ExecStart=/usr/local/bin/alertmanager --config.file=alertmanager.yml
+    Restart=always
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+  - sudo systemctl enable alertmanager
+  - sudo systemctl start alertmanager
+  - if systemctl is-active --quiet alertmanager; then
+      logger -t cloud-init "alertmanager successfully installed and started.";
+    else
+      logger -t cloud-init "alertmanager setup encountered an issue. Check alertmanager service status using 'sudo systemctl status alertmanager'.";
+    fi
+
+
