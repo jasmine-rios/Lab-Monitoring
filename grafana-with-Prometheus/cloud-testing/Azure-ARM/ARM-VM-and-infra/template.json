@@ -116,7 +116,19 @@
         "AzureBastionSubnet": {
             "type": "string",
             "defaultValue": "AzureBastionSubnet"
-        }
+        },
+        "keyVaultName": {
+			"type": "string",
+            "DefaultValue": "Grafana-KV"
+		},
+		"tenantId": {
+			"type": "string",
+            "DefaultValue": ""
+		},
+		"objectId": {
+			"type": "string",
+            "DefaultValue": "Grafana-KV"
+		}
     },
     "functions": [],
     "variables": {},
