@@ -20,7 +20,7 @@
         },
         "networkSecurityGroupNameBastion":{
             "type": "string",
-            "defaultValue": "grafana-bastion-NSG"
+            "defaultValue": "grafana-bastion-NI"
         },
         "networkSecurityGroupName": {
             "type": "string",
@@ -35,24 +35,20 @@
             "defaultValue": "grafana-host2-NSG"
         },
         "networkSecurityGroupRulesBastion": {
-            "type": "array",
-            "defaultValue": ""
+            "type": "array"
         },
         "networkSecurityGroupRules": {
-            "type": "array",
-            "defaultValue": ""
+            "type": "array"
         },
         "networkSecurityGroupRulesHost1": {
-            "type": "array",
-            "defaultValue": ""
+            "type": "array"
         },
         "networkSecurityGroupRulesHost2": {
-            "type": "array",
-            "defaultValue": ""
+            "type": "array"
         },
         "publicIpAddressNameBastion": {
             "type": "string",
-            "defaultValue": ""
+            "defaultValue": "grafana-publicIp-bastion"
         },
         "publicIpAddressSku": {
             "type": "string",
@@ -128,123 +124,106 @@
     {
         "name": "[parameters('virtualNetworkName')]",
         "type": "Microsoft.Network/virtualNetworks",
-        "apiVersion": "2020-06-01",
+        "apiVersion": "2023-04-01",
         "location": "[parameters('location')]",
         "properties": {
             "addressSpace": {
                 "addressPrefixes": [
                     "10.0.0.0/16"
                 ]
-            }
-    }
-    },
-    {
-        "type": "Microsoft.Network/virtualNetworks/subnets",
-        "apiVersion": "2020-06-01",
-        "name": "[concat(parameters('virtualNetworkName'), '/Subnet1')]",
-        "location": "[parameters('location')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
-        ],
-        "properties": {
-            "addressPrefix": "10.0.0.0/24"
+            },
+            "subnets": [
+                {
+                    "name": "[parameters('Subnet1')]",
+                    "properties": {
+                        "addressPrefix": "10.0.1.0/24"
+                    }
+                },
+                {
+                    "name": "[parameters('Subnet2')]",
+                    "properties": {
+                        "addressPrefix": "10.0.2.0/24"
+                    }
+                },
+                {
+                    "name": "[parameters('AzureBastionSubnet')]",
+                    "properties": {
+                        "addressPrefix": "10.0.3.0/24"
+                    }
+                }
+            ]
         }
-    },
-    {
-        "type": "Microsoft.Network/virtualNetworks/subnets",
-        "apiVersion": "2020-06-01",
-        "name": "[concat(parameters('virtualNetworkName'), '/Subnet2')]",
-        "location": "[parameters('location')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
-        ],
-        "properties": {
-            "addressPrefix": "10.0.1.0/24"
-        }
-    },
-    {
-        "type": "Microsoft.Network/virtualNetworks/subnets",
-        "apiVersion": "2020-06-01",
-        "name": "[concat(parameters('virtualNetworkName'), '/AzureBastionSubnet')]",
-        "location": "[parameters('location')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
-        ],
-        "properties": {
-            "addressPrefix": "10.0.2.0/24"
-        }
+
     },
     {
         "name": "[parameters('networkInterfaceName')]",
         "type": "Microsoft.Network/networkInterfaces",
-        "apiVersion": "2017-06-01",
+        "apiVersion": "2023-04-01",
         "location": "[parameters('location')]",
         "dependsOn": [
-            "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
-            "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1'))]"
+            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
+            "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'), '/subnets/', parameters('Subnet1'))]"
         ],
-
         "properties": {
             "ipConfigurations": [
                 {
                     "name": "ipconfig1",
                     "properties": {
                         "subnet": {
-                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1'))]"
+                            "id":  "[concat(resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName')), '/subnets/', parameters('Subnet1'))]"
                         },
                         "privateIPAllocationMethod": "Dynamic"
                     }
                 }
             ],
             "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]"
             }
-        }
-    },
+    }
+},
     {
         "name": "[parameters('networkInterfaceNameHost1')]",
         "type": "Microsoft.Network/networkInterfaces",
-        "apiVersion": "2017-06-01",
+        "apiVersion": "2023-04-01",
         "location": "[parameters('location')]",
         "dependsOn": [
-            "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameHost1'))]",
-            "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1'))]"
+            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHost1'))]",
+            "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'), '/subnets/', parameters('Subnet1'))]"
         ],
-
         "properties": {
             "ipConfigurations": [
                 {
                     "name": "ipconfig1",
                     "properties": {
                         "subnet": {
-                             "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1'))]"
+                            "id":   "[concat(resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName')), '/subnets/', parameters('Subnet1'))]"
                         },
                         "privateIPAllocationMethod": "Dynamic"
                     }
                 }
             ],
+        
             "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameHost1'))]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHost1'))]"
             }
         }
     },
         {
         "name": "[parameters('networkInterfaceNameHost2')]",
         "type": "Microsoft.Network/networkInterfaces",
-        "apiVersion": "2017-06-01",
+        "apiVersion": "2023-04-01",
         "location": "[parameters('location')]",
         "dependsOn": [
-            "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameHost2'))]",
-            "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet2'))]"
+            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHost2'))]",
+            "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'), '/subnets/', parameters('Subnet2'))]"
         ],
-
         "properties": {
             "ipConfigurations": [
                 {
                     "name": "ipconfig1",
                     "properties": {
                         "subnet": {
-                             "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet2'))]"
+                            "id":  "[concat(resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName')), '/subnets/', parameters('Subnet2'))]"
                         },
                         "privateIPAllocationMethod": "Dynamic"
                         
@@ -252,14 +231,14 @@
                 }
             ],
             "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameHost2'))]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHost2'))]"
             }
         }
     },
     {
         "name": "[parameters('networkSecurityGroupName')]",
         "type": "Microsoft.Network/networkSecurityGroups",
-        "apiVersion": "2017-06-01",
+        "apiVersion": "2023-04-01",
         "location": "[parameters('location')]",
         "properties": {
             "securityRules": "[parameters('networkSecurityGroupRules')]"
@@ -268,7 +247,7 @@
     {
         "name": "[parameters('networkSecurityGroupNameBastion')]",
         "type": "Microsoft.Network/networkSecurityGroups",
-        "apiVersion": "2017-06-01",
+        "apiVersion": "2023-04-01",
         "location": "[parameters('location')]",
         "properties": {
             "securityRules": "[parameters('networkSecurityGroupRulesBastion')]"
@@ -277,7 +256,7 @@
     {
         "name": "[parameters('networkSecurityGroupNameHost1')]",
         "type": "Microsoft.Network/networkSecurityGroups",
-        "apiVersion": "2017-06-01",
+        "apiVersion": "2023-04-01",
         "location": "[parameters('location')]",
         "properties": {
             "securityRules": "[parameters('networkSecurityGroupRulesHost1')]"
@@ -286,7 +265,7 @@
     {
         "name": "[parameters('networkSecurityGroupNameHost2')]",
         "type": "Microsoft.Network/networkSecurityGroups",
-        "apiVersion": "2017-06-01",
+        "apiVersion": "2023-04-01",
         "location": "[parameters('location')]",
         "properties": {
             "securityRules": "[parameters('networkSecurityGroupRulesHost2')]"
@@ -295,8 +274,11 @@
     {
         "name": "[parameters('publicIpAddressNameBastion')]",
         "type": "Microsoft.Network/publicIpAddresses",
-        "apiVersion": "2020-08-01",
+        "apiVersion": "2023-04-01",
         "location": "[parameters('location')]",
+        "dependsOn": [
+            "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'), '/subnets/', parameters('AzureBastionSubnet'))]"
+        ],
         "properties": {
             "publicIPAllocationMethod": "Static",
             "idleTimeoutInMinutes": 4
@@ -308,23 +290,22 @@
     {
     "name": "[parameters('virtualMachineNameBastion')]",
     "type": "Microsoft.Network/bastionHosts",
-    "apiVersion": "2020-06-01",
+    "apiVersion": "2023-04-01",
     "location": "[parameters('location')]",
     "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), 'AzureBastionSubnet')]",
-        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('AzureBastionSubnet'))]"
+        "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressNameBastion'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'), '/subnets/', parameters('AzureBastionSubnet'))]"
     ],
     "properties": {
         "ipConfigurations": [
             {
-                "name": "IpConfiguration",
+                "name": "ipconfig1",
                 "properties": {
                     "subnet": {
-                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), 'AzureBastionSubnet')]"
+                        "id":  "[concat(resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName')), '/subnets/', parameters('AzureBastionSubnet'))]"
                     },
-                    "publicIPAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressNameBastion'))]"
-                    }
+                    "privateIPAllocationMethod": "Dynamic"
+                    
                 }
             }
         ]
@@ -333,7 +314,7 @@
     {
     "name": "[parameters('virtualMachineName')]",
     "type": "Microsoft.Compute/virtualMachines",
-    "apiVersion": "2019-03-01",
+    "apiVersion": "2023-09-01",
     "location": "[parameters('location')]",
     "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
@@ -371,7 +352,7 @@
         "networkProfile": {
         "networkInterfaces": [
             {
-            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
+            "id": "[resourceId('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
             }
         ]
         },
@@ -388,7 +369,7 @@
 {
   "name": "[parameters('virtualMachineHost1Name')]",
   "type": "Microsoft.Compute/virtualMachines",
-  "apiVersion": "2019-03-01",
+  "apiVersion": "2023-09-01",
   "location": "[parameters('location')]",
   "dependsOn": [
     "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceNameHost1'))]"
@@ -425,7 +406,7 @@
     "networkProfile": {
       "networkInterfaces": [
         {
-          "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceNameHost1'))]"
+          "id": "[resourceId('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceNameHost1'))]"
         }
       ]
     },
@@ -442,7 +423,7 @@
 {
   "name": "[parameters('virtualMachineHost2Name')]",
   "type": "Microsoft.Compute/virtualMachines",
-  "apiVersion": "2019-03-01",
+  "apiVersion": "2023-09-01",
   "location": "[parameters('location')]",
   "dependsOn": [
     "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceNameHost2'))]"
@@ -479,7 +460,491 @@
     "networkProfile": {
       "networkInterfaces": [
         {
-          "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceNameHost2'))]"
+          "id": "[resourceId('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceNameHost2'))]"
+        }
+      ]
+    },
+    "osProfile": {
+        "computerName": "[parameters('virtualMachineHost2Name')]",
+        "adminUsername": "[parameters('adminUsername')]",
+        "adminPassword": "[parameters('adminPassword')]",
+        "windowsConfiguration": {
+            "provisionVMAgent": true
+        }
+    }
+  }
+}
+],
+    "outputs": {
+        "SSH Instructions": {
+            "type": "string",
+            "value": "[concat('On the Azure Portal, go to the Virtual Machine you want to connect to. ', '\n', 'On the Overview page of the virtual Machine, click Connect then click Bastion. ', '\n', 'Configure bastion if required and log in with the username, ', parameters('adminUsername'), ', and password, ', parameters('adminPassword'), '. ', '\n', 'A new browser will open with a session through a web browser.')]"
+
+        }
+    }
+}{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "usgovvirginia"
+        },
+        "networkInterfaceName": {
+            "type": "string",
+            "defaultValue": "grafana-NI"
+        },
+        "networkInterfaceNameHost1": {
+            "type": "string",
+            "defaultValue": "grafana-host1-NI"
+        },
+        "networkInterfaceNameHost2": {
+            "type": "string",
+            "defaultValue": "grafana-host2-NI"
+        },
+        "networkSecurityGroupNameBastion":{
+            "type": "string",
+            "defaultValue": "grafana-bastion-NI"
+        },
+        "networkSecurityGroupName": {
+            "type": "string",
+            "defaultValue": "grafana-NSG"
+        },
+        "networkSecurityGroupNameHost1": {
+            "type": "string",
+            "defaultValue": "grafana-host1-NSG"
+        },
+        "networkSecurityGroupNameHost2": {
+            "type": "string",
+            "defaultValue": "grafana-host2-NSG"
+        },
+        "networkSecurityGroupRulesBastion": {
+            "type": "array"
+        },
+        "networkSecurityGroupRules": {
+            "type": "array"
+        },
+        "networkSecurityGroupRulesHost1": {
+            "type": "array"
+        },
+        "networkSecurityGroupRulesHost2": {
+            "type": "array"
+        },
+        "publicIpAddressNameBastion": {
+            "type": "string",
+            "defaultValue": "grafana-publicIp-bastion"
+        },
+        "publicIpAddressSku": {
+            "type": "string",
+            "defaultValue": "Standard"
+        },
+        "virtualMachineNameBastion": {
+			"type": "string",
+            "defaultValue": "grafana-Bastion"
+		},
+        "virtualMachineName": {
+            "type": "string",
+            "defaultValue": "grafana-RHEL"
+        },
+        "virtualMachineHost1Name": {
+            "type": "string",
+            "defaultValue": "grafana-host1-ubuntu"
+        },
+        "virtualMachineHost2Name": {
+            "type": "string",
+            "defaultValue": "grafana-host2-win"
+        },
+        "osDiskType": {
+            "type": "string",
+            "defaultValue": "Premium_LRS"
+        },
+        "virtualMachineSize": {
+            "type": "string",
+            "defaultValue": "Standard_B2s"
+        },
+        "virtualMachineSizeHosts": {
+            "type": "string",
+            "defaultValue": "Standard_DS1_v2"
+        },
+        "adminUsername": {
+            "type": "string",
+            "defaultValue": "azureuser"
+        },
+        "adminPassword": {
+			"type": "securestring"
+		},
+        "securityType": {
+			"type": "string",
+            "defaultValue": "TrustedLaunch"
+		},
+        "secureBoot": {
+            "type": "bool",
+            "defaultValue": true
+        },
+        "vTPM": {
+            "type": "bool",
+            "defaultValue": true
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "grafana-VNet"
+        },
+        "Subnet1": {
+            "type": "string",
+            "defaultValue": "grafana-subnet1"
+        },
+        "Subnet2": {
+            "type": "string",
+            "defaultValue": "grafana-subnet2"
+        },
+        "AzureBastionSubnet": {
+            "type": "string",
+            "defaultValue": "AzureBastionSubnet"
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+    {
+        "name": "[parameters('virtualNetworkName')]",
+        "type": "Microsoft.Network/virtualNetworks",
+        "apiVersion": "2023-04-01",
+        "location": "[parameters('location')]",
+        "properties": {
+            "addressSpace": {
+                "addressPrefixes": [
+                    "10.0.0.0/16"
+                ]
+            },
+            "subnets": [
+                {
+                    "name": "[parameters('Subnet1')]",
+                    "properties": {
+                        "addressPrefix": "10.0.1.0/24"
+                    }
+                },
+                {
+                    "name": "[parameters('Subnet2')]",
+                    "properties": {
+                        "addressPrefix": "10.0.2.0/24"
+                    }
+                },
+                {
+                    "name": "[parameters('AzureBastionSubnet')]",
+                    "properties": {
+                        "addressPrefix": "10.0.3.0/24"
+                    }
+                }
+            ]
+        }
+
+    },
+    {
+        "name": "[parameters('networkInterfaceName')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "2023-04-01",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
+            "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'), '/subnets/', parameters('Subnet1'))]"
+        ],
+        "properties": {
+            "ipConfigurations": [
+                {
+                    "name": "ipconfig1",
+                    "properties": {
+                        "subnet": {
+                            "id":  "[concat(resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName')), '/subnets/', parameters('Subnet1'))]"
+                        },
+                        "privateIPAllocationMethod": "Dynamic"
+                    }
+                }
+            ],
+            "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]"
+            }
+    }
+},
+    {
+        "name": "[parameters('networkInterfaceNameHost1')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "2023-04-01",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHost1'))]",
+            "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'), '/subnets/', parameters('Subnet1'))]"
+        ],
+        "properties": {
+            "ipConfigurations": [
+                {
+                    "name": "ipconfig1",
+                    "properties": {
+                        "subnet": {
+                            "id":   "[concat(resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName')), '/subnets/', parameters('Subnet1'))]"
+                        },
+                        "privateIPAllocationMethod": "Dynamic"
+                    }
+                }
+            ],
+        
+            "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHost1'))]"
+            }
+        }
+    },
+        {
+        "name": "[parameters('networkInterfaceNameHost2')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "2023-04-01",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+            "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHost2'))]",
+            "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'), '/subnets/', parameters('Subnet2'))]"
+        ],
+        "properties": {
+            "ipConfigurations": [
+                {
+                    "name": "ipconfig1",
+                    "properties": {
+                        "subnet": {
+                            "id":  "[concat(resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName')), '/subnets/', parameters('Subnet2'))]"
+                        },
+                        "privateIPAllocationMethod": "Dynamic"
+                        
+                    }
+                }
+            ],
+            "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupNameHost2'))]"
+            }
+        }
+    },
+    {
+        "name": "[parameters('networkSecurityGroupName')]",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "apiVersion": "2023-04-01",
+        "location": "[parameters('location')]",
+        "properties": {
+            "securityRules": "[parameters('networkSecurityGroupRules')]"
+        }
+    },
+    {
+        "name": "[parameters('networkSecurityGroupNameBastion')]",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "apiVersion": "2023-04-01",
+        "location": "[parameters('location')]",
+        "properties": {
+            "securityRules": "[parameters('networkSecurityGroupRulesBastion')]"
+        }
+    },
+    {
+        "name": "[parameters('networkSecurityGroupNameHost1')]",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "apiVersion": "2023-04-01",
+        "location": "[parameters('location')]",
+        "properties": {
+            "securityRules": "[parameters('networkSecurityGroupRulesHost1')]"
+        }
+    },
+    {
+        "name": "[parameters('networkSecurityGroupNameHost2')]",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "apiVersion": "2023-04-01",
+        "location": "[parameters('location')]",
+        "properties": {
+            "securityRules": "[parameters('networkSecurityGroupRulesHost2')]"
+        }
+    },
+    {
+        "name": "[parameters('publicIpAddressNameBastion')]",
+        "type": "Microsoft.Network/publicIpAddresses",
+        "apiVersion": "2023-04-01",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+            "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'), '/subnets/', parameters('AzureBastionSubnet'))]"
+        ],
+        "properties": {
+            "publicIPAllocationMethod": "Static",
+            "idleTimeoutInMinutes": 4
+        },
+        "sku": {
+            "name": "[parameters('publicIpAddressSku')]"
+        }
+    },
+    {
+    "name": "[parameters('virtualMachineNameBastion')]",
+    "type": "Microsoft.Network/bastionHosts",
+    "apiVersion": "2023-04-01",
+    "location": "[parameters('location')]",
+    "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIpAddresses', parameters('publicIpAddressNameBastion'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'), '/subnets/', parameters('AzureBastionSubnet'))]"
+    ],
+    "properties": {
+        "ipConfigurations": [
+            {
+                "name": "ipconfig1",
+                "properties": {
+                    "subnet": {
+                        "id":  "[concat(resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName')), '/subnets/', parameters('AzureBastionSubnet'))]"
+                    },
+                    "privateIPAllocationMethod": "Dynamic"
+                    
+                }
+            }
+        ]
+    }
+    },
+    {
+    "name": "[parameters('virtualMachineName')]",
+    "type": "Microsoft.Compute/virtualMachines",
+    "apiVersion": "2023-09-01",
+    "location": "[parameters('location')]",
+    "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
+    ],
+    "properties": {
+        "hardwareProfile": {
+        "vmSize": "[parameters('virtualMachineSize')]"
+        },
+        "securityProfile": {
+            "uefiSettings": {
+                "securityType": "[parameters('securityType')]",
+                "secureBootEnabled": "[parameters('secureBoot')]",
+                "vTpmEnabled": "[parameters('vTPM')]"
+            }
+    },
+        "diagnosticsProfile": {
+            "bootDiagnostics": {
+                "enabled": true
+            }
+        },
+        "storageProfile": {
+        "osDisk": {
+            "createOption": "fromImage",
+            "managedDisk": {
+            "storageAccountType": "[parameters('osDiskType')]"
+            }
+        },
+        "imageReference": {
+            "publisher": "redhat",
+            "offer": "rhel-raw",
+            "sku": "92_gen2",
+            "version": "latest"
+        }
+        },
+        "networkProfile": {
+        "networkInterfaces": [
+            {
+            "id": "[resourceId('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
+            }
+        ]
+        },
+        "osProfile": {
+            "computerName": "[parameters('virtualMachineName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "customData": "I2Nsb3VkLWNvbmZpZwpwYWNrYWdlX3VwZ3JhZGU6IHRydWUKcGFja2FnZXM6CnJ1bmNtZDoKICAtIHN1ZG8gd2dldCAtTyBncmFmYW5hLnRhci5neiBodHRwczovL2RsLmdyYWZhbmEuY29tL2VudGVycHJpc2UvcmVsZWFzZS9ncmFmYW5hLWVudGVycHJpc2UtMTAuMy4zLTEueDg2XzY0LnJwbQogIC0gc3VkbyB0YXIgLXh2emYgZ3JhZmFuYS50YXIuZ3ogLUMgL3Vzci9sb2NhbC8KICAtIHN1ZG8gc3lzdGVtY3RsIGVuYWJsZSBncmFmYW5hLXNlcnZlcgogIC0gc3VkbyBzeXN0ZW1jdGwgZGFlbW9uLXJlbG9hZAogIC0gc3VkbyBmaXJld2FsbC1jbWQgLS16b25lPXB1YmxpYyAtLWFkZC1wb3J0PTMwMDAvdGNwIC0tYWRkLXBvcnQ9OTA5MC90Y3AgLS1hZGQtcG9ydD05MDkxL3RjcCAtLXBlcm1hbmVudAogIC0gc3VkbyBmaXJld2FsbC1jbWQgLS1yZWxvYWQKICAtIHN1ZG8gc2VkIC1pICdzLztwcm90b2NvbCA9IGh0dHAvcHJvdG9jb2wgPSBodHRwLycgL2V0Yy9ncmFmYW5hL2dyYWZhbmEuaW5pCiAgLSBzdWRvIHNlZCAtaSAncy87aHR0cF9wb3J0ID0gMzAwMC9odHRwX3BvcnQgPSAzMDAwLycgL2V0Yy9ncmFmYW5hL2dyYWZhbmEuaW5pCiAgLSBzdWRvIHRlZSAvZXRjL3N5c3RlbWQvc3lzdGVtL2dyYWZhbmEtc2VydmVyLnNlcnZpY2UgPDxFT0YKICAgIFtVbml0XQogICAgRGVzY3JpcHRpb249R3JhZmFuYQogICAgV2FudHM9bmV0d29yay1vbmxpbmUudGFyZ2V0CiAgICBBZnRlcj1uZXR3b3JrLW9ubGluZS50YXJnZXQKCiAgICBbU2VydmljZV0KICAgIFR5cGU9c2ltcGxlCiAgICBFeGVjU3RhcnQ9L3Vzci9sb2NhbC9ncmFmYW5hCiAgICBSZXN0YXJ0PWFsd2F5cwoKICAgIFtJbnN0YWxsXQogICAgV2FudGVkQnk9bXVsdGktdXNlci50YXJnZXQKICAgIEVPRgogIC0gc3VkbyBzeXN0ZW1jdGwgc3RhcnQgZ3JhZmFuYS1zZXJ2ZXIKICAtIGlmIHN5c3RlbWN0bCBpcy1hY3RpdmUgLS1xdWlldCBncmFmYW5hLXNlcnZlcjsgdGhlbgogICAgICBsb2dnZXIgLXQgY2xvdWQtaW5pdCAiR3JhZmFuYSBzdWNjZXNzZnVsbHkgaW5zdGFsbGVkIGFuZCBzdGFydGVkLiI7CiAgICBlbHNlCiAgICAgIGxvZ2dlciAtdCBjbG91ZC1pbml0ICJHcmFmYW5hIHNldHVwIGVuY291bnRlcmVkIGFuIGlzc3VlLiBDaGVjayBHcmFmYW5hIHNlcnZpY2Ugc3RhdHVzIHVzaW5nICdzdWRvIHN5c3RlbWN0bCBzdGF0dXMgZ3JhZmFuYS1zZXJ2ZXInLiI7CiAgICBmaQogIC0gc3VkbyB3Z2V0IC1PIHByb21ldGhldXMudGFyLmd6IGh0dHBzOi8vZ2l0aHViLmNvbS9wcm9tZXRoZXVzL3Byb21ldGhldXMvcmVsZWFzZXMvZG93bmxvYWQvdjIuNTEuMS9wcm9tZXRoZXVzLTIuNTEuMS5saW51eC1hbWQ2NC50YXIuZ3oKICAtIHN1ZG8gdGFyIC14dmYgcHJvbWV0aGV1cy50YXIuZ3ogLUMgL3Vzci9sb2NhbC8KICAtIGNkICIvdXNyL2xvY2FsL2Jpbi9wcm9tZXRoZXVzLnRhci5neiIKICAtIHN1ZG8gY2htb2QgK3ggcHJvbWV0aGV1cwogIC0gc3VkbyBta2RpciAtcCAvZXRjL3Byb21ldGhldXMvZGF0YQogIC0gc3VkbyBtdiBwcm9tZXRoZXVzLnltbCAvZXRjL3Byb21ldGhldXMvCiAgLSBzdWRvIHRlZSAvZXRjL3N5c3RlbWQvc3lzdGVtL3Byb21ldGhldXMuc2VydmljZSA8PEVPRgogICAgW1VuaXRdCiAgICBEZXNjcmlwdGlvbj1Qcm9tZXRoZXVzIE1vbml0b3JpbmcKICAgIFdhbnRzPW5ldHdvcmstb25saW5lLnRhcmdldAogICAgQWZ0ZXI9bmV0d29yay1vbmxpbmUudGFyZ2V0CgogICAgW1NlcnZpY2VdCiAgICBUeXBlPXNpbXBsZQogICAgRXhlY1N0YXJ0PS91c3IvbG9jYWwvcHJvbWV0aGV1cyAtLWNvbmZpZy5maWxlPS9ldGMvcHJvbWV0aGV1cy9wcm9tZXRoZXVzLnltbCAtLXN0b3JhZ2UudHNkYi5wYXRoPS9ldGMvcHJvbWV0aGV1cy9kYXRhCiAgICBSZXN0YXJ0PWFsd2F5cwoKICAgIFtJbnN0YWxsXQogICAgV2FudGVkQnk9bXVsdGktdXNlci50YXJnZXQKICAgRU9GCiAgLSBzdWRvIHN5c3RlbWN0bCBkYWVtb24tcmVsb2FkCiAgLSBzdWRvIHN5c3RlbWN0bCBlbmFibGUgcHJvbWV0aGV1cwogIC0gc3VkbyBzeXN0ZW1jdGwgc3RhcnQgcHJvbWV0aGV1cwogIC0gaWYgc3lzdGVtY3RsIGlzLWFjdGl2ZSAtLXF1aWV0IHByb21ldGhldXM7IHRoZW4KICAgICAgbG9nZ2VyIC10IGNsb3VkLWluaXQgIlByb21ldGhldXMgc3VjY2Vzc2Z1bGx5IGluc3RhbGxlZCBhbmQgc3RhcnRlZC4iOwogICAgZWxzZQogICAgICBsb2dnZXIgLXQgY2xvdWQtaW5pdCAiUHJvbWV0aGV1cyBzZXR1cCBlbmNvdW50ZXJlZCBhbiBpc3N1ZS4gQ2hlY2sgUHJvbWV0aGV1cyBzZXJ2aWNlIHN0YXR1cyB1c2luZyAnc3VkbyBzeXN0ZW1jdGwgc3RhdHVzIHByb21ldGhldXMnLiI7CiAgICBmaQogIAogIC0gc3VkbyB3Z2V0IC1PIHB1c2hnYXRld2F5LnRhci5neiBodHRwczovL2dpdGh1Yi5jb20vcHJvbWV0aGV1cy9wdXNoZ2F0ZXdheS9yZWxlYXNlcy9kb3dubG9hZC92MS43LjAvcHVzaGdhdGV3YXktMS43LjAubGludXgtYW1kNjQudGFyLmd6CiAgLSBzdWRvIHRhciAteHZmIHB1c2hnYXRld2F5LnRhci5neiAtQyAvdXNyL2xvY2FsLwogIC0gc3VkbyB0ZWUgL2V0Yy9zeXN0ZW1kL3N5c3RlbS9wdXNoZ2F0ZXdheS5zZXJ2aWNlIDw8RU9GCiAgICBbVW5pdF0KICAgIERlc2NyaXB0aW9uPVByb21ldGhldXMgUHVzaCBHYXRld2F5CiAgICBXYW50cz1uZXR3b3JrLW9ubGluZS50YXJnZXQKICAgIEFmdGVyPW5ldHdvcmstb25saW5lLnRhcmdldAoKICAgIFtTZXJ2aWNlXQogICAgVHlwZT1zaW1wbGUKICAgIEV4ZWNTdGFydD0vdXNyL2xvY2FsL3B1c2hnYXRld2F5CiAgICBSZXN0YXJ0PWFsd2F5cwoKICAgIFtJbnN0YWxsXQogICAgV2FudGVkQnk9bXVsdGktdXNlci50YXJnZXQKICAgIEVPRgogIC0gc3VkbyBzeXN0ZW1jdGwgZGFlbW9uLXJlbG9hZAogIC0gc3VkbyBzeXN0ZW1jdGwgZW5hYmxlIHB1c2hnYXRld2F5CiAgLSBzdWRvIHN5c3RlbWN0bCBzdGFydCBwdXNoZ2F0ZXdheQogIC0gUFJPTUVUSEVVU19DT05GSUdfRklMRT0iL2V0Yy9wcm9tZXRoZXVzL3Byb21ldGhldXMueW1sIgogIC0gY2F0ID4+ICIkUFJPTUVUSEVVU19DT05GSUdfRklMRSIgPDxFT0YKc2NyYXBlX2NvbmZpZ3M6CiAgLSBqb2JfbmFtZTogJ3Byb21ldGhldXMnCiAgICBzdGF0aWNfY29uZmlnczoKICAgICAgLSB0YXJnZXRzOgogICAgICAgIC0gJ2xvY2FsaG9zdDo5MDkwJyAjIFByb21ldGhldXMgcnVubmluZyBvbiB0aGUgc2FtZSBzZXJ2ZXIKICAtIGpvYl9uYW1lOiAncHVzaGdhdGV3YXknCiAgICBzdGF0aWNfY29uZmlnczoKICAgICAgLSB0YXJnZXRzOgogICAgICAgIC0gJ2xvY2FsaG9zdDo5MDkxJyAjIFB1c2ggR2F0ZXdheSBydW5uaW5nIG9uIHRoZSBzYW1lIHNlcnZlcgpFT0YKICAtIGVjaG8gIllvdSBtdXN0IGFkZCB0aGUgSVBzIHRvIHRoZSBwcm9tZXRoZXVzLnltbCBmaWxlIGFuZCByZW1lbWJlciBub3QgdG8gdXNlIHRhYiBidXQgdXNlIHNwYWNlIHRvIGVuc3VyZSB0aGUgeWFtbCB3aWxsIHdvcmsiCiAgLSBlY2hvICJJZiB1c2luZyB0cmFkaXRvbmFsIHByb21ldGhldXMgd2l0aCBhIG5vZGUgZXhwb3J0ZXIgb24gc3lzdGVtcywgYWxzbyBjYWxsZWQgdGhlIHB1bGwgbWV0aG9kLCBhZGQgdGhlIElQcyB5b3Ugd2FudCB0byBtb25pdG9yIGFmdGVyIGxvY2FsaG9zdCBvbiB0aGUgcHJvbWV0aGV1cyBqb2IuIEZvbGxvdyB0aGUgSVBzIHdpdGggYSBjb2xvbiBhbmQgOTA5MCBhbmQgYSBjb21tZW50IG9uIHdoYXQgdGhlIHNlcnZlciBpcy4gWW91IG11c3QgaGF2ZSB0aGUgbm9kZSBleHBvcnRlciBvbiB0aGUgdGFyZ2V0IHN5c3RlbXMuIgogIC0gZWNobyAiSWYgdXNpbmcgdGhlIHB1c2hnYXR3YXkgbWV0aG9kIGZvciB0ZW1wb3Jhcnkgam9icyBvciBXaW5kb3dzIFZNcywgYWRkIHRoZSBJUHMgeW91IHdhbnQgdG8gbW9uaXRvciBhZnRlciBsb2NhbGhvc3Qgb24gdGhlIGdhdGV3YXkgam9iLiBGb2xsb3cgdGhlIElQcyB3aXRoIGEgY29sb24gYW5kIDkwOTEgYW5kIGEgY29tbWVudCBvbiB3aGF0IHRoZSBzZXJ2ZXIgaXMuIFlvdSBtdXN0IGhhdmUgOTA5MSBlbmFibGVkIG9uIHRoZSB0YXJnZXQgc3lzdGVtcy4iCiAgLSBlY2hvICJBZnRlciBjb21wbGV0aW9uIG9mIGFkZGluZyB0aGUgSVBzIGFuZCBzYXZpbmcgdGhlIHByb21ldGhldXMueW1sIGZpbGUsIHN0YXJ0IFByb21ldGhldXMgd2l0aCAnc3VkbyBzeXN0ZW1jdGwgcmVzdGFydCBwcm9tZXRoZXVzJy4iCiAgCg==",
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": true
+        }
+        }
+    }
+    },
+{
+  "name": "[parameters('virtualMachineHost1Name')]",
+  "type": "Microsoft.Compute/virtualMachines",
+  "apiVersion": "2023-09-01",
+  "location": "[parameters('location')]",
+  "dependsOn": [
+    "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceNameHost1'))]"
+  ],
+  "properties": {
+    "hardwareProfile": {
+      "vmSize": "[parameters('virtualMachineSizeHosts')]"
+    },
+    "securityProfile": {
+        "uefiSettings": {
+            "secureBootEnabled": "[parameters('secureBoot')]",
+            "vTpmEnabled": "[parameters('vTPM')]"
+        }
+  },
+    "diagnosticsProfile": {
+        "bootDiagnostics": {
+            "enabled": true
+        }
+    },
+    "storageProfile": {
+      "osDisk": {
+        "createOption": "fromImage",
+        "managedDisk": {
+          "storageAccountType": "[parameters('osDiskType')]"
+        }
+      },
+      "imageReference": {
+        "publisher": "Canonical",
+        "offer": "UbuntuServer",
+        "sku": "18.04-LTS",
+        "version": "latest"
+      }
+    },
+    "networkProfile": {
+      "networkInterfaces": [
+        {
+          "id": "[resourceId('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceNameHost1'))]"
+        }
+      ]
+    },
+    "osProfile": {
+        "computerName": "[parameters('virtualMachineHost1Name')]",
+        "adminUsername": "[parameters('adminUsername')]",
+        "customData": "base64(#cloud-config\npackage_upgrade: true\npackages:\n  - wget\n  - tar\nruncmd:\n  - sudo apt update\n  - sudo apt install -y wget tar\n  - sudo wget -O node-exporter.tar.gz https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz\n  - sudo tar -xvzf node-exporter.tar.gz -C /usr/local/\n  - sudo ufw allow 9090/tcp\n  - cd /usr/local/node_exporter-1.7.0.linux-amd64\n  - sudo tee /etc/systemd/system/node-exporter.service <<EOF\n    [Unit]\n    Description=Prometheus Node Exporter\n    Wants=network-online.target\n    After=network-online.target\n\n    [Service]\n    Type=simple\n    ExecStart=/usr/local/node_exporter-1.7.0.linux-amd64/node_exporter\n    Restart=always\n\n    [Install]\n    WantedBy=multi-user.target\n   EOF\n  - sudo systemctl daemon-reload\n  - sudo systemctl enable node-exporter\n  - sudo systemctl start node-exporter\n  - if systemctl is-active --quiet node-exporter; then\n      logger -t cloud-init 'Node exporter successfully installed and started.';\n    else\n      logger -t cloud-init 'Node-exporter setup encountered an issue. Check node-exporter service status using ''sudo systemctl status node-exporter''.';\n    fi\n)",
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": true
+        }
+    }
+  }
+},
+{
+  "name": "[parameters('virtualMachineHost2Name')]",
+  "type": "Microsoft.Compute/virtualMachines",
+  "apiVersion": "2023-09-01",
+  "location": "[parameters('location')]",
+  "dependsOn": [
+    "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceNameHost2'))]"
+  ],
+  "properties": {
+    "hardwareProfile": {
+      "vmSize": "[parameters('virtualMachineSizeHosts')]"
+    },
+    "securityProfile": {
+        "uefiSettings": {
+            "secureBootEnabled": "[parameters('secureBoot')]",
+            "vTpmEnabled": "[parameters('vTPM')]"
+        }
+  },
+    "diagnosticsProfile": {
+        "bootDiagnostics": {
+            "enabled": true
+        }
+    },
+    "storageProfile": {
+      "osDisk": {
+        "createOption": "fromImage",
+        "managedDisk": {
+          "storageAccountType": "[parameters('osDiskType')]"
+        }
+      },
+    "imageReference": {
+        "publisher": "MicrosoftWindowsServer",
+        "offer": "WindowsServer",
+        "sku": "2019-Datacenter",
+        "version": "latest"
+    }
+    },
+    "networkProfile": {
+      "networkInterfaces": [
+        {
+          "id": "[resourceId('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceNameHost2'))]"
         }
       ]
     },
