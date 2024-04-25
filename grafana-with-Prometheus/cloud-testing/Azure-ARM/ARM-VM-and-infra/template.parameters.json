@@ -221,6 +221,15 @@
         },
 		"AzureBastionSubnet": {
 			"value": "AzureBastionSubnet"
+		},
+		"keyVaultName": {
+			"value": "Grafana-KV"
+		},
+		"tenantId": {
+			"value": "c8b6ab9e-6ac4-43af-8d77-3c8bf2b853b3"
+		},
+		"objectId": {
+			"value": ""
 		}
 	}
 }
