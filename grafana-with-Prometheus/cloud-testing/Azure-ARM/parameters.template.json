@@ -53,7 +53,7 @@
                         "protocol": "TCP",
                         "access": "Allow",
                         "direction": "Inbound",
-                        "sourceAddressPrefix": "10.0.2.0/24",
+                        "sourceAddressPrefix": "10.0.3.0/24",
                         "sourcePortRange": "*",
                         "destinationAddressPrefix": "*",
                         "destinationPortRange": "22",
@@ -113,7 +113,7 @@
                         "protocol": "TCP",
                         "access": "Allow",
                         "direction": "Inbound",
-                        "sourceAddressPrefix": "10.0.2.0/24",
+                        "sourceAddressPrefix": "10.0.3.0/24",
                         "sourcePortRange": "*",
                         "destinationAddressPrefix": "*",
                         "destinationPortRange": "22",
@@ -145,7 +145,7 @@
                         "protocol": "TCP",
                         "access": "Allow",
                         "direction": "Inbound",
-                        "sourceAddressPrefix": "10.0.2.0/24",
+                        "sourceAddressPrefix": "10.0.3.0/24",
                         "sourcePortRange": "*",
                         "destinationAddressPrefix": "*",
                         "destinationPortRange": "3389",
@@ -181,10 +181,10 @@
             "value": "grafana-RHEL"
         },
         "virtualMachineHost1Name": {
-            "value": "grafana-host1-ubuntu"
+            "value": "grafana-host1"
         },
         "virtualMachineHost2Name": {
-            "value": "grafana-host2-win"
+            "value": "grafana-host2"
         },
         "osDiskType": {
             "value": "Premium_LRS"
@@ -200,9 +200,6 @@
         },
         "adminPassword": {
             "value": null
-        },
-        "securityType": {
-            "value": "TrustedLaunch"
         },
         "secureBoot": {
             "value": true
