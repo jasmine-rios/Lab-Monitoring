@@ -1,0 +1,226 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "eastus"
+        },
+        "networkInterfaceName": {
+            "value": "grafana-NI"
+        },
+        "networkInterfaceNameHost1": {
+            "value": "grafana-host1-NI"
+        },
+        "networkInterfaceNameHost2": {
+            "value": "grafana-host2-NI"
+        },
+        "networkSecurityGroupNameBastion": {
+            "value": "grafana-bastion-NSG"
+        },
+        "networkSecurityGroupName": {
+            "value": "grafana-NSG"
+        },
+        "networkSecurityGroupNameHost1": {
+            "value": "grafana-host1-NSG"
+        },
+        "networkSecurityGroupNameHost2": {
+            "value": "grafana-host2-NSG"
+        },
+        "networkSecurityGroupRulesBastion": {
+            "value": [
+                {
+                    "name": "HTTPS",
+                    "properties": {
+                        "priority": 300,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "443",
+                        "description": "Allow inbound traffic from internet to Bastion."
+                    }
+                }
+            ]
+        },
+        "networkSecurityGroupRules": {
+            "value": [
+                {
+                    "name": "SSH",
+                    "properties": {
+                        "priority": 300,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "10.0.2.0/24",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "22",
+                        "description": "Allow inbound SSH traffic from bastion host."
+                    }
+                },
+                {
+                    "name": "grafana",
+                    "properties": {
+                        "priority": 310,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "VirtualNetwork",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "3000",
+                        "description": "Allow inbound default Grafana port"
+                    }
+                },
+                {
+                    "name": "Prometheus",
+                    "properties": {
+                        "priority": 330,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "VirtualNetwork",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "9090",
+                        "description": "Allow inbound default Prometheus port"
+                    }
+                },
+                {
+                    "name": "Prometheus-gateway",
+                    "properties": {
+                        "priority": 340,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "VirtualNetwork",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "9091",
+                        "description": "Allow inbound default Prometheus gateway port"
+                    }
+                }
+            ]
+        },
+        "networkSecurityGroupRulesHost1": {
+            "value": [
+                {
+                    "name": "SSH",
+                    "properties": {
+                        "priority": 300,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "10.0.2.0/24",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "22",
+                        "description": "Allow inbound SSH traffic from bastion host."
+                    }
+                },
+                {
+                    "name": "Prometheus",
+                    "properties": {
+                        "priority": 310,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "VirtualNetwork",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "9090",
+                        "description": "Allow inbound default Prometheus port"
+                    }
+                }
+            ]
+        },
+        "networkSecurityGroupRulesHost2": {
+            "value": [
+                {
+                    "name": "RDP",
+                    "properties": {
+                        "priority": 300,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "10.0.2.0/24",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "3389",
+                        "description": "Allow inbound RDP traffic from bastion host."
+                    }
+                },
+                {
+                    "name": "Prometheus-gateway",
+                    "properties": {
+                        "priority": 310,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "VirtualNetwork",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "9091",
+                        "description": "Allow inbound default Prometheus gateway port"
+                    }
+                }
+            ]
+        },
+        "publicIpAddressNameBastion": {
+            "value": "grafana-publicIp-bastion"
+        },
+        "publicIpAddressSku": {
+            "value": "Standard"
+        },
+        "virtualMachineNameBastion": {
+            "value": "grafana-Bastion"
+        },
+        "virtualMachineName": {
+            "value": "grafana-RHEL"
+        },
+        "virtualMachineHost1Name": {
+            "value": "grafana-host1-ubuntu"
+        },
+        "virtualMachineHost2Name": {
+            "value": "grafana-host2-win"
+        },
+        "osDiskType": {
+            "value": "Premium_LRS"
+        },
+        "virtualMachineSize": {
+            "value": "Standard_B2s"
+        },
+        "virtualMachineSizeHosts": {
+            "value": "Standard_DS1_v2"
+        },
+        "adminUsername": {
+            "value": "azureuser"
+        },
+        "adminPassword": {
+            "value": null
+        },
+        "securityType": {
+            "value": "TrustedLaunch"
+        },
+        "secureBoot": {
+            "value": true
+        },
+        "vTPM": {
+            "value": true
+        },
+        "virtualNetworkName": {
+            "value": "grafana-VNet"
+        },
+        "subnet1": {
+            "value": "grafana-subnet1"
+        },
+        "subnet2": {
+            "value": "grafana-subnet2"
+        },
+        "azureBastionSubnet": {
+            "value": "AzureBastionSubnet"
+        }
+    }
+}
