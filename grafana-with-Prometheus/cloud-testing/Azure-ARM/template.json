@@ -234,24 +234,21 @@
             "apiVersion": "2023-04-01",
             "name": "[parameters('networkSecurityGroupNameBastion')]",
             "location": "[parameters('location')]",
+            "dependsOn": [ 
+                "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
+            ],
             "properties": {
-                "securityRules": "[parameters('networkSecurityGroupRulesBastion')]"
-            },
-            "resources": [
-                {
-                    "type": "Microsoft.Network/virtualNetworks/subnets",
-                    "apiVersion": "2023-04-01",
-                    "name": "[concat(parameters('virtualNetworkName'), '/AzureBastionSubnet')]",
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameBastion'))]"
-                    ],
-                    "properties": {
-                        "networkSecurityGroup": {
-                            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupNameBastion'))]"
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName')), '/subnets/', parameters('AzureBastionSubnet'))]"
+                            }
                         }
                     }
-                }
-            ]
+                ]
+            }
         },
         {
 
