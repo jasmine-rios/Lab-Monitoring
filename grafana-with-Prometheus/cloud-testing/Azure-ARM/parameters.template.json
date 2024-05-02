@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": "eastus"
+            "value": "usgovvirginia"
         },
         "networkInterfaceName": {
             "value": "grafana-NI"
@@ -199,7 +199,7 @@
             "value": "azureuser"
         },
         "adminPassword": {
-            "value": null
+            "value": ""
         },
         "secureBoot": {
             "value": true
