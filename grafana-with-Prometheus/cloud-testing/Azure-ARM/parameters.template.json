@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": "usgovvirginia"
+            "value": "eastus"
         },
         "networkInterfaceName": {
             "value": "grafana-NI"
@@ -200,12 +200,6 @@
         },
         "adminPassword": {
             "value": null
-        },
-        "secureBoot": {
-            "value": true
-        },
-        "vTPM": {
-            "value": true
         },
         "virtualNetworkName": {
             "value": "grafana-VNet"
