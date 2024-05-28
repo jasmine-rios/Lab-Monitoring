@@ -1,0 +1,108 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Install Grafana and Prometheus EC2 instance and supporting infrastructure on AWS
+Parameters:
+  Location:
+    Description: Location for resources
+    Type: String
+    Default: us-gov-east-1
+    AllowedValues: [us-east-1, us-east-2, us-west-1,us-west-2, us-gov-west-1, us-gov-east-1]
+  VPCName:
+      Description: VPC name to be created to host resources on
+      Type: String
+      Default: vpc-grafana-testing
+  PublicSubnetName:
+      Description: Public subnet name to be created to host resources on
+      Type: String
+      Default: Public-sub-grafana-testing
+  PrivateSubnetNameHost1:
+      Description: Private subnet name to be created to host Ubuntu instance resources on
+      Type: String
+      Default: Private-sub-host1
+  PrivateSubnetNameHost2:
+      Description: Private subnet name to be created to host Ubuntu instance resources on
+      Type: String
+      Default: Private-sub-host2
+  AvailiabilityZoneName1:
+      Description: Availability zone name to be created to host resources on
+      Type: String
+      Default: us-gov-east-1a
+  AvailiabilityZoneName2:
+      Description: Availability zone name to be created to host resources on
+      Type: String
+      Default: us-gov-east-1b
+  NetworkInterfaceNameRHEL:
+    Description: Name of network interface for the RHEL EC2 instance
+    Type: String
+    Default: RHEL-eth0
+  NetworkInterfaceNameHost1:
+    Description: Name of network interface for the Ubuntu EC2 instance
+    Type: String
+    Default: Host1-eth0
+  NetworkInterfaceNameHost2:
+    Description: Name of network interface for the Windows EC2 instance
+    Type: String
+    Default: Host2-eth0
+  NetworkInterfaceNameBastion:
+    Description: Name of network interface for the Bastion EC2 instance
+    Type: String
+    Default: Bastion-eth0
+  SecurityGroupNameRHEL:
+    Description: Name of the security group for the RHEL EC2 instance
+    Type: String
+    Default: RHEL-SG
+  SecurityGroupNameHost1:
+    Description: Name of the security group for the Ubuntu EC2 instance
+    Type: String
+    Default: Host1-SG
+  SecurityGroupNameHost2:
+    Description: Name of the security group for the Windows EC2 instance
+    Type: String
+    Default: Host2-SG
+  SecurityGroupNameBastion:
+    Description: Name of the security group for the Bastion EC2 instance
+    Type: String
+    Default: Bastion-SG
+  SecurityGroupRulesRHEL:
+    Description: Rules for the security group for the RHEL EC2 instance
+    Type: Array
+  SecurityGroupRulesHost1:
+    Description: Rules for the security group for the Ubuntu EC2 instance
+    Type: Array
+  SecurityGroupRulesHost2:
+    Description: Rules for the security group for the Windows EC2 instance
+    Type: Array
+  SecurityGroupRulesBastion:
+    Description: Rules for the security group for the Bastion EC2 instance
+    Type: Array
+  PublicIpAdressNameBastion:
+    Description: Name of public ip address for the Bastion EC2 instance
+    Type: String
+    Default: Bastion-IP
+  InstanceNameRHEL: 
+    Description: Name of the RHEL EC2 instance
+    Type: String
+    Default: RHEL-Instance
+  InstanceNameHost1:
+    Description: Name of the Ubuntu EC2 instance
+    Type: String
+    Default: Host1-Instance
+  InstanceNameHost2:
+    Description: Name of the Windows EC2 instance
+    Type: String
+    Default: Host2-Instance
+  InstanceNameBastion:
+    Description: Name of the Bastion EC2 instance
+    Type: String
+    Default: Bastion-Instance
+
+  
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  InstanceType:
+    Description: WebServer EC2 instance type
+    Type: String
+    Default: t2.small
+    AllowedValues: [t2.small, t2.medium, t2.large]
+
