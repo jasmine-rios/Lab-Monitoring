@@ -64,20 +64,48 @@ Parameters:
     Default: Bastion-SG
   SecurityGroupRulesRHEL:
     Description: Rules for the security group for the RHEL EC2 instance
-    Type: Array
+    Type: List<AWS::EC2::SecurityGroupRule>
+    Default:
+      - IpProtocol: ssh
+        FromPort: -1
+        ToPort: 22
+        CidrIp: !Ref VpcCider
+      - IpProtocol: tcp
+        FromPort: -1
+        ToPort: 9090
+        CidrIp: !GetAtt PublicIPAddressNameBastion.PublicIp
   SecurityGroupRulesHost1:
     Description: Rules for the security group for the Ubuntu EC2 instance
-    Type: Array
+    Type: List<AWS::EC2::SecurityGroupRule>
+    Default:
+      - IpProtocol: ssh
+        FromPort: -1
+        ToPort: 22
+        CidrIp: !GetAtt PublicIPAddressNameBastion.PublicIp
+      - IpProtocol: tcp
+        FromPort: -1
+        ToPort: 9090
+        CidrIp: !Ref VpcCidr
   SecurityGroupRulesHost2:
     Description: Rules for the security group for the Windows EC2 instance
-    Type: Array
+    Type: List<AWS::EC2::SecurityGroupRule>
+    Default:
+      - IpProtocol: ssh
+        FromPort: -1
+        ToPort: 22
+        CidrIp: !GetAtt PublicIPAddressNameBastion.PublicIp
+      - IpProtocol: tcp
+        FromPort: -1
+        ToPort: 9090
+        CidrIp: !Ref VpcCidr
   SecurityGroupRulesBastion:
     Description: Rules for the security group for the Bastion EC2 instance
-    Type: Array
-  PublicIpAdressNameBastion:
-    Description: Name of public ip address for the Bastion EC2 instance
-    Type: String
-    Default: Bastion-IP
+    Type: List<AWS::EC2::SecurityGroupRule>
+    Default:
+      - IpProtocol: https
+        FromPort: -1
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
   InstanceNameRHEL: 
     Description: Name of the RHEL EC2 instance
     Type: String
@@ -94,15 +122,114 @@ Parameters:
     Description: Name of the Bastion EC2 instance
     Type: String
     Default: Bastion-Instance
-
-  
-  KeyName:
-    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
-    Type: AWS::EC2::KeyPair::KeyName
-    ConstraintDescription: must be the name of an existing EC2 KeyPair.
-  InstanceType:
-    Description: WebServer EC2 instance type
+  InstanceTypeRHEL:
+    Description: Size of the EC2 instance for the RHEL EC2 instance
     Type: String
     Default: t2.small
     AllowedValues: [t2.small, t2.medium, t2.large]
+  InstanceTypeHost1:
+    Description: Size of the EC2 instance for the Ubuntu EC2 instance
+    Type: String
+    Default: t2.small
+    AllowedValues: [t2.small, t2.medium, t2.large]
+  InstanceTypeHost2:
+    Description: Size of the EC2 instance for the Windows EC2 instance
+    Type: String
+    Default: t2.small
+    AllowedValues: [t2.small, t2.medium, t2.large]
+  InstanceTypeBastion:
+    Description: Size of the EC2 instance for the Windows EC2 instance
+    Type: String
+    Default: t2.small
+    AllowedValues: [t2.small, t2.medium, t2.large]
+  ImageIdRHEL:
+    Description: Image ID for the RHEL EC2 instance
+    Type: AWS::EC2::Image::Id
+    Default: ami-03b59d2a779dad4d3
+  ImageIdHost1:
+    Description: Image ID for the Ubuntu EC2 instance
+    Type: AWS::EC2::Image::Id
+    Default: ami-09040d770ffe2224f
+  ImageIdHost2:
+    Description: Image ID for the Windows EC2 instance
+    Type: AWS::EC2::Image::Id
+    Default: ami-01f6ebaa698be00b0
+  ImageIdBastion:
+    Description: Image ID for the Bastion EC2 instance running on Amazon Linux
+    Type: AWS::EC2::Image::Id
+    Default: ami-0647086318eb3b918
+  PublicIpAddressNameBastion:
+    Description: Name of public ip address for the Bastion EC2 instance
+    Type: String
+    Default: Bastion-IP
+  VpcCider:
+    Description: Cider for the VPC
+    Type: String
+    Default: 10.0.0.0/16
+  PublicSubnetCider:
+    Description: Cider for the public subnet
+    Type: String
+    Default: 10.0.0.0/24
+  PrivateSubnetCiderHost1:
+    Description: Cider for the private subnet
+    Type: String
+    Default: 10.0.1.0/24
+  PrivateSubnetCiderHost2:
+    Description: Cider for the private subnet
+    Type: String
+    Default: 10.0.2.0/24
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  SsmRoleName:
+    Description: Name of the SSM role
+    Type: String
+    Default: SSM-Role
+Variables: 
+  $AmazonLinux2AMIIdLookup= (aws ssm get-parameter --name /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2 --query 'Parameter.Value' --output text)
+  $RHEL8AMIIdLookup= (aws ssm get-parameter --name /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2 --query 'Parameter.Value' --output text)
+  $Windows2019AMIIdLookup= (aws ssm get-parameter --name /aws/service/ami-windows-latest/Windows_Server-2019-English-Full-Base --query 'Parameter.Value' --output text)
+  $UbuntuAMIIdLookup= (aws ssm get-parameter --name /aws/service/canonical/ubuntu/server/focal/stable/current/amd64/hvm/ebs-gp2/ami-id --query 'Parameter.Value' --output text)
+Functions:
+  
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCider
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Ref VPCName
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnetCider
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Ref PublicSubnetName
+  PrivateSubnetHost1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnetCiderHost1
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Ref PrivateSubnetNameHost1
+  PrivateSubnetHost2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnetCiderHost2
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Ref PrivateSubnetNameHost2
+  
 
