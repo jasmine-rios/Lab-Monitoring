@@ -2,7 +2,7 @@
 
 ## Description
 
-This repo is for installing and validating lab monitoring solutions for the DevLab.
+This repo is for installing and validating lab monitoring solutions.
 
 ## Nagios Core Installation Script- install-nagios-core.ps1
 
