@@ -3,6 +3,7 @@
 # WORKING
 
 # Set Grafana API URL and credentials
+# CHANGE GRAFANA_USER and GRAFNA_PASSWORD to be the username and password you want to use
 GRAFANA_URL="http://localhost:3000/api/datasources"
 GRAFANA_USER="admin"
 GRAFANA_PASSWORD="admin"
